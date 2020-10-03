@@ -2,7 +2,8 @@
   "name": "@fernthedev/serverless-offline-step-functions",
   "version": "0.0.1",
   "description": "Serverless Offline Plugin to Support Step Functions for Local Development",
-  "main": "./dist/main.js",
+  "main": "dist/main.js",
+  "types": "dist/main.d.ts",
   "homepage": "https://github.com/jefer590/serverless-offline-step-functions#README",
   "repository": "github:jefer590/serverless-offline-step-functions",
   "author": "Fernando Alvarez <masterofer36@gmail.com>",
@@ -10,24 +11,36 @@
   "private": false,
   "scripts": {
     "check:lint": "eslint '*/**/*.ts'",
-    "check:types": "tsc --noEmit"
+    "check:types": "tsc --noEmit",
+    "compile": "tsc",
+    "compile:watch": "tsc --watch"
   },
   "bugs": {
     "url": "https://github.com/jefer590/serverless-offline-step-functions/issues"
   },
-  "dependencies": {},
+  "dependencies": {
+    "chalk": "^4.1.0",
+    "express": "^4.17.1",
+    "http-terminator": "^2.0.3"
+  },
   "devDependencies": {
     "@commitlint/cli": "^11.0.0",
     "@commitlint/config-conventional": "^11.0.0",
+    "@types/express": "^4.17.8",
+    "@types/http-terminator": "^2.0.1",
     "@types/node": "^14.11.2",
+    "@types/serverless": "^1.78.0",
     "@typescript-eslint/eslint-plugin": "^4.3.0",
     "@typescript-eslint/parser": "^4.3.0",
+    "aws-sdk": "^2.766.0",
     "eslint": "^7.10.0",
     "eslint-config-prettier": "^6.12.0",
     "eslint-plugin-prettier": "^3.1.4",
     "husky": "^4.3.0",
     "lint-staged": "^10.4.0",
     "prettier": "^2.1.2",
+    "serverless": "^2.4.0",
+    "serverless-offline": "^6.8.0",
     "typescript": "^4.0.3"
   },
   "keywords": [

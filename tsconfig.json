@@ -11,13 +11,16 @@
     "forceConsistentCasingInFileNames": true,
     "allowJs": false,
     "strictNullChecks": true,
-    "noImplicitAny": true
+    "noImplicitAny": false,
+    "outDir": "dist",
+    "declaration": true
   },
   "include": [
     "src/**/*"
   ],
   "exclude": [
     "node_modules",
-    "**/*.spec.ts"
-  ]
+    "**/*.spec.ts",
+    "dist"
+  ],
 }
