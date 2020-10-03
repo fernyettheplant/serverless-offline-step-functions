@@ -12,5 +12,12 @@
     "allowJs": false,
     "strictNullChecks": true,
     "noImplicitAny": true
-  }
+  },
+  "include": [
+    "src/**/*"
+  ],
+  "exclude": [
+    "node_modules",
+    "**/*.spec.ts"
+  ]
 }
