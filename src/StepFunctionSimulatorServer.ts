@@ -3,21 +3,22 @@ import type { StepFunctions } from 'aws-sdk';
 import chalk from 'chalk';
 import express, { Express, Request, Response } from 'express';
 import { StateMachineExecutor } from './StateMachineExecutor';
+import { StateDefinition, StateMachine, StateMachines } from './types/StateMachine';
 
 export type StepFunctionSimulatorServerOptions = {
   port: number;
-  stateMachines: any[];
+  stateMachines: StateMachines;
 };
 
 export class StepFunctionSimulatorServer {
   #express: Express;
   #httpTerminator?: HttpTerminator;
   // TODO: Move State Machines and type it
-  #httpOptions: StepFunctionSimulatorServerOptions;
+  #options: StepFunctionSimulatorServerOptions;
   #logPrefix = chalk.magenta('[Step Functions API Simulator]');
 
   constructor(options: StepFunctionSimulatorServerOptions) {
-    this.#httpOptions = options;
+    this.#options = options;
     this.#express = express();
   }
 
@@ -26,14 +27,11 @@ export class StepFunctionSimulatorServer {
 
     try {
       this.setupMiddlewares();
-      httpServer = this.#express.listen(this.#httpOptions.port, () => {
-        console.log(`${this.#logPrefix} server ready: ${this.#httpOptions.port} 🚀`);
+      httpServer = this.#express.listen(this.#options.port, () => {
+        console.log(`${this.#logPrefix} server ready: ${this.#options.port} 🚀`);
       });
     } catch (err) {
-      console.error(
-        `Unexpected error while starting serverless-offline server on port ${this.#httpOptions.port}:`,
-        err,
-      );
+      console.error(`Unexpected error while starting serverless-offline server on port ${this.#options.port}:`, err);
       process.exit(1);
     }
 
@@ -56,7 +54,7 @@ export class StepFunctionSimulatorServer {
       }),
     );
 
-    this.#express.post('/', this.resolveStateMachine.bind(this));
+    this.#express.use(this.resolveStateMachine.bind(this));
   }
 
   private resolveStateMachine(req: Request, res: Response) {
@@ -64,23 +62,18 @@ export class StepFunctionSimulatorServer {
 
     const executionInput: StepFunctions.Types.StartExecutionInput = req.body;
     const stateMachineName: string = executionInput.stateMachineArn.split(':').slice(-1)[0];
-    const stateMachineToExecute = this.#httpOptions.stateMachines[stateMachineName];
+    const stateMachineToExecute = this.#options.stateMachines[stateMachineName];
 
     if (!stateMachineToExecute) {
       return res.status(500);
     }
 
-    // TODO: Refactor What is needed in the contructor
-    // const currentState = stateMachineToExecute.definition.States[stateMachineToExecute.definition.StartAt];
-    const sme = new StateMachineExecutor(
-      stateMachineName,
-      stateMachineToExecute.definition.StartAt,
-      stateMachineToExecute,
-    );
+    const startAtState: StateDefinition =
+      stateMachineToExecute.definition.States[stateMachineToExecute.definition.StartAt];
+    const sme = new StateMachineExecutor(stateMachineToExecute);
 
-    // TODO: Implement
     // TODO: check integration type to set input properly (i.e. lambda vs. sns)
-    sme.spawnProcess();
+    sme.execute(startAtState, executionInput.input);
 
     // per docs, step execution response includes the start date and execution arn
     return res.status(200).json({

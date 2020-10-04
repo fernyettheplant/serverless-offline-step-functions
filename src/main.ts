@@ -1,27 +1,11 @@
+import { Worker } from 'worker_threads';
+import type { ServerlessOfflineStepFunctionsOptions } from './types/ServerlessOfflineStepFunctionsOptions';
+import type {
+  CLIOptions,
+  ServerlessOfflineStepFunctionsCommands,
+} from './types/ServerlessOfflineStepFunctionsCommands';
+import type { ServerlessOfflineHooks } from './types/ServerlessOfflineHooks';
 import { StepFunctionSimulatorServer } from './StepFunctionSimulatorServer';
-
-type CLIOptions = Record<string, unknown>;
-
-type ServerlessOfflineHooks = {
-  'before:offline:start:init': unknown;
-  'offline:start:init': unknown;
-  'offline:start:end': unknown;
-};
-
-type ServerlessOfflineStepFunctionsOptions = {
-  port: number;
-};
-
-type ServerlessOfflineStepFunctionsCommands = CLIOptions & {
-  '@fernthedev/serverless-offline-step-functions': {
-    options: {
-      port: {
-        usage: string;
-        required: false;
-      };
-    };
-  };
-};
 
 class ServerlessOfflineStepFunctionsPlugin {
   public hooks: ServerlessOfflineHooks;
@@ -69,7 +53,7 @@ class ServerlessOfflineStepFunctionsPlugin {
   }
 
   private ready() {
-    console.log('im a tired');
+    console.log('ready');
   }
 
   private async end() {
