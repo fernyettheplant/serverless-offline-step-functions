@@ -3,7 +3,7 @@ import type { StepFunctions } from 'aws-sdk';
 import chalk from 'chalk';
 import express, { Express, Request, Response } from 'express';
 import { StateMachineExecutor } from './StateMachineExecutor';
-import { StateDefinition, StateMachine, StateMachines } from './types/StateMachine';
+import { StateDefinition, StateMachines } from './types/StateMachine';
 
 export type StepFunctionSimulatorServerOptions = {
   port: number;
@@ -20,13 +20,13 @@ export class StepFunctionSimulatorServer {
   constructor(options: StepFunctionSimulatorServerOptions) {
     this.#options = options;
     this.#express = express();
+    this.setupMiddlewares();
   }
 
   public async initServer(): Promise<void> {
     let httpServer;
 
     try {
-      this.setupMiddlewares();
       httpServer = this.#express.listen(this.#options.port, () => {
         console.log(`${this.#logPrefix} server ready: ${this.#options.port} 🚀`);
       });

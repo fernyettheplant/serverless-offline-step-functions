@@ -1,6 +1,6 @@
 import type { StateDefinition, StateMachine } from './types/StateMachine';
 import { JSONPath } from 'jsonpath-plus';
-import { TaskExecutor } from './stateTasks/TaskExecutor';
+
 import { StateTypeExecutorFactory } from './stateTasks/StateTypeExecutorFactory';
 
 export class StateMachineExecutor {
@@ -16,27 +16,34 @@ export class StateMachineExecutor {
     this.#executionArn = `${this.#stateMachine.name}-${this.#stateMachine.definition.StartAt}-${this.#startDate}`;
   }
 
-  public async execute(stateDefinition: StateDefinition, input: string | undefined): Promise<void> {
+  public async execute(stateDefinition: StateDefinition, input: string | undefined): Promise<string | void> {
     console.log(`* * * * * ${this.#currentStateName} * * * * *`);
     console.log('input: \n', JSON.stringify(input, null, 2), '\n');
 
     // This will be used as the parent node key for when the process
     // finishes and its output needs to be processed.
     // const outputKey = `sf-${Date.now()}`;
-    const inputToPass = this.processTaskInputPath(stateDefinition, input);
+    const inputToPass = this.processPath(input, stateDefinition.InputPath);
+    // TODO: Parameters Task
     const typeExecutor = StateTypeExecutorFactory.getExecutor(stateDefinition.Type);
     const result = await typeExecutor.execute(inputToPass);
 
+    // TODO: Do Result Selector
+
+    const resultTask = this.processPath(result, stateDefinition.ResultPath);
+    const outputTask = this.processPath(resultTask, stateDefinition.OutputPath);
+    console.log('Output: \n', JSON.stringify(result, null, 2), '\n');
+
     if (stateDefinition.End) {
       console.log('State Machine Ended');
-      return;
+      // TODO: Verify if last Task will serialize to JSON
+      return JSON.stringify(outputTask);
     }
 
     this.#currentStateName = stateDefinition.Next;
-    console.log('output: \n', JSON.stringify(result, null, 2), '\n');
 
     // Call recursivly State Machine Executor until no more states
-    this.execute(this.#stateMachine.definition.States[stateDefinition.Next], result);
+    this.execute(this.#stateMachine.definition.States[stateDefinition.Next], outputTask);
   }
 
   get startDate(): number {
@@ -48,16 +55,11 @@ export class StateMachineExecutor {
   }
 
   /**
-   * Process the state's InputPath - per AWS docs:
-   * The InputPath field selects a portion of the state's input to pass to the state's
-   * task for processing. If you omit the field, it gets the $ value, representing the
-   * entire input. If you use null, the input is discarded (not sent to the state's
-   * task) and the task receives JSON text representing an empty object {}.
-   * https://docs.aws.amazon.com/step-functions/latest/dg/amazon-states-language-input-output-processing.html
+   * Process the state's InputPath, OutputPath
    */
-  private processTaskInputPath(stateDefinition: StateDefinition, input: any): any {
+  private processPath(input: any, path?: string): any {
     return JSONPath({
-      path: !stateDefinition.InputPath ? '$' : stateDefinition.InputPath,
+      path: !path ? '$' : path,
       json: input,
     });
   }

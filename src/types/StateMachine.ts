@@ -20,5 +20,7 @@ export type StateDefinition = {
   Resource: string;
   Next: string;
   End: boolean;
-  InputPath: string;
+  InputPath?: string;
+  ResultPath?: string;
+  OutputPath?: string;
 };

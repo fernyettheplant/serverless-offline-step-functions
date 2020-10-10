@@ -44,16 +44,12 @@ class ServerlessOfflineStepFunctionsPlugin {
 
     this.#stepFunctionSimulatorServer = new StepFunctionSimulatorServer({
       port: this.#options?.port || 8014,
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-ignore
       stateMachines: this.#serverless.service.initialServerlessConfig?.stepFunctions?.stateMachines,
     });
-
-    return this.#stepFunctionSimulatorServer.initServer();
   }
 
   private ready() {
-    console.log('ready');
+    return this.#stepFunctionSimulatorServer?.initServer();
   }
 
   private async end() {
