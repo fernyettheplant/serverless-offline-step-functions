@@ -62,6 +62,7 @@ export class StateMachineExecutor {
     return this._executionArn;
   }
 
+  // TODO: Refactor to own file... the process if input/output will dependend of the type of Executor
   private processInputPath(dataJson: string | undefined | null, inputPath: string | null | undefined): string {
     if (inputPath === null) {
       return '{}';

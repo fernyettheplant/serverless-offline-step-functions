@@ -17,12 +17,35 @@ export type StateMachines = {
   [key: string]: StateMachine;
 };
 
-export type StateDefinition = {
+export type PassStateDefinition = {
   Type: StateType;
-  Resource: string;
   Next: string;
   End: boolean;
+  Comment?: string;
   InputPath?: string;
-  ResultPath?: string;
   OutputPath?: string;
+  Result?: Record<any, unknown>;
+  ResultPath?: string;
+  Parameters?: string; // TODO: TBD
 };
+
+export type TaskStateDefinition = {
+  Type: StateType;
+  Next: string;
+  End: boolean;
+  Comment?: string;
+  InputPath?: string;
+  OutputPath?: string;
+  Resource: string;
+  Parameters?: string; // TODO: TBD
+  ResultPath?: string;
+  ResultSelector?: string;
+  Retry?: Record<any, unknown>[];
+  Catch?: Record<any, unknown>[];
+  TimeoutSeconds?: number;
+  TimeoutSecondsPath?: string;
+  HeartbeatSeconds?: number;
+  HeartbeatSecondsPath?: string;
+};
+
+export type StateDefinition = PassStateDefinition | TaskStateDefinition;
