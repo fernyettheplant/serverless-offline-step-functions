@@ -16,34 +16,35 @@ export class StateMachineExecutor {
     this.#executionArn = `${this.#stateMachine.name}-${this.#stateMachine.definition.StartAt}-${this.#startDate}`;
   }
 
-  public async execute(stateDefinition: StateDefinition, input: string | undefined): Promise<string | void> {
+  public async execute(stateDefinition: StateDefinition, inputJson: string | undefined): Promise<string | void> {
     console.log(`* * * * * ${this.#currentStateName} * * * * *`);
-    console.log('input: \n', JSON.stringify(input, null, 2), '\n');
-
-    // This will be used as the parent node key for when the process
-    // finishes and its output needs to be processed.
-    // const outputKey = `sf-${Date.now()}`;
-    const inputToPass = this.processPath(input, stateDefinition.InputPath);
-    // TODO: Parameters Task
+    console.log('input: \n', JSON.stringify(inputJson, null, 2), '\n');
     const typeExecutor = StateTypeExecutorFactory.getExecutor(stateDefinition.Type);
-    const result = await typeExecutor.execute(this.#stateMachine.name, this.#currentStateName, inputToPass);
 
+    // Proccess Input
+    const proccessedInputJson = this.processInputPath(inputJson, stateDefinition.InputPath);
+    // TODO: Parameters Task
+
+    // Execute State
+    const parsedInput = JSON.parse(proccessedInputJson);
+    const resultState = await typeExecutor.execute(this.#stateMachine.name, this.#currentStateName, parsedInput);
+    const resultStateJson = JSON.stringify(resultState);
+
+    // ProcessOutput
     // TODO: Do Result Selector
-
     // const resultTask = this.processPath(result, stateDefinition.ResultPath);
     // const outputTask = this.processPath(resultTask, stateDefinition.OutputPath);
-    console.log('Output: \n', JSON.stringify(result, null, 2), '\n');
+    console.log('Output: \n', JSON.stringify(resultState, null, 2), '\n');
 
     if (stateDefinition.End) {
       console.log('State Machine Ended');
-      // TODO: Verify if last Task will serialize to JSON
-      return JSON.stringify(result);
+      return resultStateJson;
     }
 
     this.#currentStateName = stateDefinition.Next;
 
     // Call recursivly State Machine Executor until no more states
-    this.execute(this.#stateMachine.definition.States[stateDefinition.Next], result);
+    this.execute(this.#stateMachine.definition.States[stateDefinition.Next], resultStateJson);
   }
 
   get startDate(): Date {
@@ -52,6 +53,25 @@ export class StateMachineExecutor {
 
   get executionArn(): string {
     return this.#executionArn;
+  }
+
+  private processInputPath(dataJson: string | undefined, inputPath: string | null | undefined) {
+    if (inputPath === null) {
+      return '{}';
+    }
+
+    const inputJson = dataJson || '{}';
+
+    const result = JSONPath({
+      path: !inputPath ? '$' : inputPath,
+      json: inputJson,
+    });
+
+    if (!result || result.length === 0) {
+      throw new Error('');
+    }
+
+    return result[0];
   }
 
   /**

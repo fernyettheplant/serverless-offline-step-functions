@@ -73,7 +73,7 @@ export class StepFunctionSimulatorServer {
     const sme = new StateMachineExecutor(stateMachineToExecute);
 
     // TODO: check integration type to set input properly (i.e. lambda vs. sns)
-    sme.execute(startAtState, executionInput.input);
+    sme.execute(startAtState, JSON.stringify(executionInput.input));
 
     // per docs, step execution response includes the start date and execution arn
     const output: StepFunctions.Types.StartExecutionOutput = {
