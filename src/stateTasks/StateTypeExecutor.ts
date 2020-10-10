@@ -1,3 +1,3 @@
 export interface StateTypeExecutor {
-  execute(input: any): Promise<any>;
+  execute(stateMachineName: string, stateName: string, input: any): Promise<any>;
 }

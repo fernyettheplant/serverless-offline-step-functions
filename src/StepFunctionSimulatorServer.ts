@@ -76,9 +76,11 @@ export class StepFunctionSimulatorServer {
     sme.execute(startAtState, executionInput.input);
 
     // per docs, step execution response includes the start date and execution arn
-    return res.status(200).json({
+    const output: StepFunctions.Types.StartExecutionOutput = {
       startDate: sme.startDate,
       executionArn: sme.executionArn,
-    });
+    };
+
+    return res.status(200).json(output);
   }
 }
