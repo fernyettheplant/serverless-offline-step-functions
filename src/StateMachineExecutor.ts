@@ -28,23 +28,24 @@ export class StateMachineExecutor {
     // Execute State
     const parsedInput = JSON.parse(proccessedInputJson);
     const resultState = await typeExecutor.execute(this.#stateMachine.name, this.#currentStateName, parsedInput);
-    const resultStateJson = JSON.stringify(resultState);
+    const resultStateJson = resultState ? JSON.stringify(resultState) : '{}';
 
     // ProcessOutput
     // TODO: Do Result Selector
-    // const resultTask = this.processPath(result, stateDefinition.ResultPath);
-    // const outputTask = this.processPath(resultTask, stateDefinition.OutputPath);
-    console.log('Output: \n', JSON.stringify(resultState, null, 2), '\n');
+    let proccessedOutputJson = this.processResultPath(resultStateJson, stateDefinition.ResultPath);
+    proccessedOutputJson = this.processOutputPath(proccessedOutputJson, stateDefinition.OutputPath);
+
+    console.log('Output: \n', JSON.stringify(proccessedOutputJson, null, 2), '\n');
 
     if (stateDefinition.End) {
       console.log('State Machine Ended');
-      return resultStateJson;
+      return proccessedOutputJson;
     }
 
     this.#currentStateName = stateDefinition.Next;
 
     // Call recursivly State Machine Executor until no more states
-    this.execute(this.#stateMachine.definition.States[stateDefinition.Next], resultStateJson);
+    this.execute(this.#stateMachine.definition.States[stateDefinition.Next], proccessedOutputJson);
   }
 
   get startDate(): Date {
@@ -55,7 +56,7 @@ export class StateMachineExecutor {
     return this.#executionArn;
   }
 
-  private processInputPath(dataJson: string | undefined, inputPath: string | null | undefined) {
+  private processInputPath(dataJson: string | undefined | null, inputPath: string | null | undefined): string {
     if (inputPath === null) {
       return '{}';
     }
@@ -63,7 +64,7 @@ export class StateMachineExecutor {
     const inputJson = dataJson || '{}';
 
     const result = JSONPath({
-      path: !inputPath ? '$' : inputPath,
+      path: inputPath === undefined ? '$' : inputPath,
       json: inputJson,
     });
 
@@ -74,13 +75,29 @@ export class StateMachineExecutor {
     return result[0];
   }
 
-  /**
-   * Process the state's InputPath, OutputPath
-   */
-  private processPath(input: any, path?: string): any {
-    return JSONPath({
-      path: !path ? '$' : path,
-      json: input,
+  private processResultPath(dataJson: string, resultPath?: string): string {
+    const result = JSONPath({
+      path: resultPath || '$',
+      json: dataJson,
     });
+
+    if (!result || result.length === 0) {
+      throw new Error('');
+    }
+
+    return result[0];
+  }
+
+  private processOutputPath(dataJson: string, outputPath?: string): string {
+    const result = JSONPath({
+      path: outputPath || '$',
+      json: dataJson,
+    });
+
+    if (!result || result.length === 0) {
+      throw new Error('');
+    }
+
+    return result[0];
   }
 }
