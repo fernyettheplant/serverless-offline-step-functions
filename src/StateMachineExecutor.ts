@@ -4,20 +4,21 @@ import { JSONPath } from 'jsonpath-plus';
 import { StateTypeExecutorFactory } from './stateTasks/StateTypeExecutorFactory';
 
 export class StateMachineExecutor {
-  readonly #stateMachine: StateMachine;
-  readonly #startDate: Date;
-  readonly #executionArn: string;
-  #currentStateName: string;
+  private readonly stateMachine: StateMachine;
+  private readonly _startDate: Date;
+  private readonly _executionArn: string;
+  private currentStateName: string;
 
   constructor(stateMachine: StateMachine) {
-    this.#stateMachine = stateMachine;
-    this.#currentStateName = stateMachine.definition.StartAt;
-    this.#startDate = new Date();
-    this.#executionArn = `${this.#stateMachine.name}-${this.#stateMachine.definition.StartAt}-${this.#startDate}`;
+    this.stateMachine = stateMachine;
+    this.currentStateName = stateMachine.definition.StartAt;
+    this._startDate = new Date();
+    this._executionArn = `${this.stateMachine.name}-${this.stateMachine.definition.StartAt}-${this._startDate}`;
   }
 
+  // TODO: Include Context in the JSON Input
   public async execute(stateDefinition: StateDefinition, inputJson: string | undefined): Promise<string | void> {
-    console.log(`* * * * * ${this.#currentStateName} * * * * *`);
+    console.log(`* * * * * ${this.currentStateName} * * * * *`);
     console.log('input: \n', JSON.stringify(inputJson, null, 2), '\n');
     const typeExecutor = StateTypeExecutorFactory.getExecutor(stateDefinition.Type);
 
@@ -27,7 +28,7 @@ export class StateMachineExecutor {
 
     // Execute State
     const parsedInput = JSON.parse(proccessedInputJson);
-    const resultState = await typeExecutor.execute(this.#stateMachine.name, this.#currentStateName, parsedInput);
+    const resultState = await typeExecutor.execute(this.stateMachine.name, this.currentStateName, parsedInput);
     const resultStateJson = resultState ? JSON.stringify(resultState) : '{}';
 
     // ProcessOutput
@@ -42,18 +43,18 @@ export class StateMachineExecutor {
       return proccessedOutputJson;
     }
 
-    this.#currentStateName = stateDefinition.Next;
+    this.currentStateName = stateDefinition.Next;
 
     // Call recursivly State Machine Executor until no more states
-    this.execute(this.#stateMachine.definition.States[stateDefinition.Next], proccessedOutputJson);
+    this.execute(this.stateMachine.definition.States[stateDefinition.Next], proccessedOutputJson);
   }
 
   get startDate(): Date {
-    return this.#startDate;
+    return this._startDate;
   }
 
   get executionArn(): string {
-    return this.#executionArn;
+    return this._executionArn;
   }
 
   private processInputPath(dataJson: string | undefined | null, inputPath: string | null | undefined): string {
