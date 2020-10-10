@@ -57,11 +57,10 @@
   },
   "husky": {
     "commit-msg": "commitlint -E HUSKY_GIT_PARAMS",
-    "pre-commit": "lint-staged"
+    "pre-commit": "npm run check:types && lint-staged"
   },
   "lint-staged": {
-    "*": [
-      "check:types",
+    "*.ts": [
       "check:lint"
     ]
   }
