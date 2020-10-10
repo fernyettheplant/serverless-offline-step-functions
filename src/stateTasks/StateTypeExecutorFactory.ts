@@ -1,4 +1,3 @@
-import { String } from 'aws-sdk/clients/acm';
 import { StateTypeExecutor } from './StateTypeExecutor';
 import { StateTypes } from './StateTypes';
 import { TaskExecutor } from './TaskExecutor';
