@@ -76,12 +76,17 @@ class ServerlessOfflineStepFunctionsPlugin {
     const statesInfoHandler = StateInfoHandler.getInstance();
     const definedStateMachinesArr = Object.entries(definedStateMachines);
 
+    // Per StateMachine
     for (const [stateMachineName, stateMachineOptions] of definedStateMachinesArr) {
-      // Per StateMachine
       const states = Object.entries((stateMachineOptions as any).definition.States);
 
+      // Per State in the StateMachine
       for (const [stateName, stateOptions] of states) {
-        // Per State in the StateMachine
+        if (!stateOptions?.Resource) {
+          // The State Machine in here could be a Pass, Failed or Wait
+          break;
+        }
+
         const functionName = stateOptions.Resource.split('-').slice(-1)[0];
         const { handler } = definedFunctions[functionName];
         const indexOfHandlerNameSeparator = handler.lastIndexOf('.');

@@ -1,3 +1,5 @@
+import { StateType } from '../stateTasks/StateType';
+
 export type StateMachineDefinition = {
   StartAt: string;
   States: {
@@ -16,7 +18,7 @@ export type StateMachines = {
 };
 
 export type StateDefinition = {
-  Type: string;
+  Type: StateType;
   Resource: string;
   Next: string;
   End: boolean;

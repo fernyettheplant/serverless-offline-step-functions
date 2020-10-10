@@ -1,4 +1,4 @@
-export enum StateTypes {
+export enum StateType {
   // Lambda Execution
   Task = 'Task',
   // Should pass input directly to output without doing work

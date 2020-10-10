@@ -2,6 +2,7 @@ import type { StateDefinition, StateMachine } from './types/StateMachine';
 import { JSONPath } from 'jsonpath-plus';
 
 import { StateTypeExecutorFactory } from './stateTasks/StateTypeExecutorFactory';
+import { StateType } from './stateTasks/StateType';
 
 export class StateMachineExecutor {
   private readonly stateMachine: StateMachine;
@@ -29,24 +30,28 @@ export class StateMachineExecutor {
     // Execute State
     const parsedInput = JSON.parse(proccessedInputJson);
     const resultState = await typeExecutor.execute(this.stateMachine.name, this.currentStateName, parsedInput);
-    const resultStateJson = resultState ? JSON.stringify(resultState) : '{}';
+    let outputJson = resultState ? JSON.stringify(resultState) : '{}';
 
     // ProcessOutput
     // TODO: Do Result Selector
-    let proccessedOutputJson = this.processResultPath(resultStateJson, stateDefinition.ResultPath);
-    proccessedOutputJson = this.processOutputPath(proccessedOutputJson, stateDefinition.OutputPath);
 
-    console.log('Output: \n', JSON.stringify(proccessedOutputJson, null, 2), '\n');
+    if (stateDefinition.Type !== StateType.Fail) {
+      if ([StateType.Parallel, StateType.Task, StateType.Pass].includes(stateDefinition.Type)) {
+        outputJson = this.processResultPath(outputJson, stateDefinition.ResultPath);
+      }
 
-    if (stateDefinition.End) {
-      console.log('State Machine Ended');
-      return proccessedOutputJson;
+      outputJson = this.processOutputPath(outputJson, stateDefinition.OutputPath);
     }
 
-    this.currentStateName = stateDefinition.Next;
+    if ([StateType.Succeed, StateType.Fail].includes(stateDefinition.Type) || stateDefinition.End) {
+      console.log('State Machine Ended');
+      return outputJson;
+    }
 
     // Call recursivly State Machine Executor until no more states
-    this.execute(this.stateMachine.definition.States[stateDefinition.Next], proccessedOutputJson);
+    this.currentStateName = stateDefinition.Next;
+    console.log('Output: \n', JSON.stringify(outputJson, null, 2), '\n');
+    this.execute(this.stateMachine.definition.States[stateDefinition.Next], outputJson);
   }
 
   get startDate(): Date {
