@@ -1,3 +1,4 @@
+import type { StateMachineDefinition } from './StateMachine';
 import { StateType } from '../stateTasks/StateType';
 
 export type StateInfo = {
@@ -116,11 +117,30 @@ export type TaskStateDefinition = CommonStateDefinition & {
   HeartbeatSecondsPath?: string;
 };
 
-export type MapStateDefinition = CommonStateDefinition & {};
+export type MapStateDefinition = CommonStateDefinition & {
+  Iterator: StateMachineDefinition;
+  ItemsPath?: string;
+  MaxConcurrency?: number;
+  ResultPath?: string;
+  ResultSelector?: string;
+  Retry?: TaskRetryRule[];
+  Catch?: TaskCatchRule[];
+};
 
-export type WaitStateDefinition = CommonStateDefinition & {};
+export type WaitStateDefinition = CommonStateDefinition & {
+  Seconds?: number;
+  Timestamp?: string;
+  SecondsPath?: string;
+  TimestampPath?: string;
+};
 
-export type ParallelStateDefinition = CommonStateDefinition & {};
+export type ParallelStateDefinition = CommonStateDefinition & {
+  Branches: StateMachineDefinition[];
+  ResultPath?: string;
+  ResultSelector?: string;
+  Retry?: TaskRetryRule[];
+  Catch?: TaskCatchRule[];
+};
 
 export type StateDefinition =
   | PassStateDefinition
