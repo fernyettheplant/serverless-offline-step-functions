@@ -10,39 +10,39 @@ export class StateProcessor {
 
     const result = JSONPath({
       path: inputPath === undefined ? '$' : inputPath,
-      json: inputJson,
+      json: JSON.parse(inputJson),
     });
 
     if (!result || result.length === 0) {
       throw new Error('');
     }
 
-    return result[0];
+    return JSON.stringify(result[0]);
   }
 
-  public static processResultPath(dataJson: string, resultPath?: string): string {
+  public static processResultPath(json: string, resultPath?: string): string {
     const result = JSONPath({
       path: resultPath || '$',
-      json: dataJson,
+      json: JSON.parse(json),
     });
 
     if (!result || result.length === 0) {
       throw new Error('');
     }
 
-    return result[0];
+    return JSON.stringify(result[0]);
   }
 
-  public static processOutputPath(dataJson: string, outputPath?: string): string {
+  public static processOutputPath(json: string, outputPath?: string): string {
     const result = JSONPath({
       path: outputPath || '$',
-      json: dataJson,
+      json: JSON.parse(json),
     });
 
     if (!result || result.length === 0) {
       throw new Error('');
     }
 
-    return result[0];
+    return JSON.stringify(result[0]);
   }
 }

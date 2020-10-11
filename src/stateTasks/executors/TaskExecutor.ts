@@ -1,11 +1,11 @@
 import { promises as fs, constants as FsConstants } from 'fs';
 import path from 'path';
 
-import type { StateTypeExecutor } from './StateTypeExecutor';
-import type { TaskStateDefinition } from '../types/State';
+import type { StateTypeExecutor } from '../StateTypeExecutor';
+import type { TaskStateDefinition } from '../../types/State';
 
-import { StateInfoHandler } from '../StateInfoHandler';
-import { StateProcessor } from '../StateProcessor';
+import { StateInfoHandler } from '../../StateInfoHandler';
+import { StateProcessor } from '../../StateProcessor';
 
 export class TaskExecutor implements StateTypeExecutor {
   public async execute(

@@ -1,4 +1,4 @@
-import { StateTypeExecutor } from './StateTypeExecutor';
+import { StateTypeExecutor } from '../StateTypeExecutor';
 
 export class PassExecutor implements StateTypeExecutor {
   public execute(): Promise<string> {

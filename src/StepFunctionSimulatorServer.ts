@@ -1,5 +1,5 @@
-import type { StepFunctions } from 'aws-sdk';
 import { createHttpTerminator, HttpTerminator } from 'http-terminator';
+import type { StepFunctions } from 'aws-sdk';
 import chalk from 'chalk';
 import express, { Express, Request, Response } from 'express';
 

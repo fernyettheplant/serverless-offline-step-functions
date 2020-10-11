@@ -24,6 +24,7 @@ export class StateMachineExecutor {
     const typeExecutor = StateTypeExecutorFactory.getExecutor(stateDefinition.Type);
 
     // Execute State
+    //TODO: Perhaps return what is the next state?
     const outputJson = await typeExecutor.execute(
       this.stateMachine.name,
       this.currentStateName,
