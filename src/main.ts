@@ -82,12 +82,12 @@ class ServerlessOfflineStepFunctionsPlugin {
 
       // Per State in the StateMachine
       for (const [stateName, stateOptions] of states) {
-        if (!stateOptions?.Resource) {
+        if (!(stateOptions as any)?.Resource) {
           // The State Machine in here could be a Pass, Failed or Wait
           break;
         }
 
-        const functionName = stateOptions.Resource.split('-').slice(-1)[0];
+        const functionName = (stateOptions as any).Resource.split('-').slice(-1)[0];
         const { handler } = definedFunctions[functionName];
         const indexOfHandlerNameSeparator = handler.lastIndexOf('.');
         const handlerPath = handler.substring(0, indexOfHandlerNameSeparator);

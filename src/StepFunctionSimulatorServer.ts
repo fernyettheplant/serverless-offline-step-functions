@@ -1,9 +1,11 @@
-import { createHttpTerminator, HttpTerminator } from 'http-terminator';
 import type { StepFunctions } from 'aws-sdk';
+import { createHttpTerminator, HttpTerminator } from 'http-terminator';
 import chalk from 'chalk';
 import express, { Express, Request, Response } from 'express';
+
+import type { StateMachines } from './types/StateMachine';
+import type { StateDefinition } from './types/State';
 import { StateMachineExecutor } from './StateMachineExecutor';
-import { StateDefinition, StateMachines } from './types/StateMachine';
 
 export type StepFunctionSimulatorServerOptions = {
   port: number;
