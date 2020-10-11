@@ -1,7 +1,4 @@
-type StateInfo = {
-  handlerPath: string;
-  handlerName: string;
-};
+import type { StateInfo } from './types/State';
 
 export class StateInfoHandler {
   private static INSTANCE: StateInfoHandler;

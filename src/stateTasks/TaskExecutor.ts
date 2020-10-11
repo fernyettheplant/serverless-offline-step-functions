@@ -1,11 +1,19 @@
 import { promises as fs, constants as FsConstants } from 'fs';
 import path from 'path';
+
+import type { StateTypeExecutor } from './StateTypeExecutor';
+import type { TaskStateDefinition } from '../types/State';
+
 import { StateInfoHandler } from '../StateInfoHandler';
-import { StateTypeExecutor } from './StateTypeExecutor';
+import { StateProcessor } from '../StateProcessor';
 
 export class TaskExecutor implements StateTypeExecutor {
-  // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
-  public async execute(stateMachineName: string, stateName: string, input: any): Promise<any> {
+  public async execute(
+    stateMachineName: string,
+    stateName: string,
+    stateDefinition: TaskStateDefinition,
+    inputJson: string | undefined,
+  ): Promise<any> {
     const statesInfoHandler = StateInfoHandler.getInstance();
     const stateInfo = statesInfoHandler.getStateInfo(stateMachineName, stateName);
 
@@ -14,11 +22,33 @@ export class TaskExecutor implements StateTypeExecutor {
     }
 
     // TODO: Handle Lambda Context and Callback
+    const input = this.processInput(inputJson, stateDefinition);
     const context = {};
     const lambdaPath = await this.getWebpackOrCommonFuction(stateInfo.handlerPath);
     const functionLambda = await import(`${lambdaPath}`);
 
-    return functionLambda[stateInfo.handlerName](input, context);
+    const output = await functionLambda[stateInfo.handlerName](input, context);
+
+    const outputJson = this.processOutput(output, stateDefinition);
+
+    return outputJson;
+  }
+
+  private processInput(json: string | undefined, stateDefinition: TaskStateDefinition): any {
+    const proccessedInputJson = StateProcessor.processInputPath(json, stateDefinition.InputPath);
+    // TODO: Parameters Task
+
+    return JSON.parse(proccessedInputJson);
+  }
+
+  private processOutput(output: any, stateDefinition: TaskStateDefinition): string {
+    let outputJson = output ? JSON.stringify(output) : '{}';
+
+    // TODO: Do Result Selector
+    outputJson = StateProcessor.processResultPath(outputJson, stateDefinition.ResultPath);
+    outputJson = StateProcessor.processOutputPath(outputJson, stateDefinition.OutputPath);
+
+    return outputJson;
   }
 
   private async getWebpackOrCommonFuction(lambdaFilePath: string): Promise<string> {
