@@ -13,7 +13,8 @@
     "strictNullChecks": true,
     "noImplicitAny": false,
     "outDir": "dist",
-    "declaration": true
+    "declaration": true,
+    "removeComments": true
   },
   "include": [
     "src/**/*"
