@@ -64,7 +64,7 @@
   },
   "lint-staged": {
     "*.ts": [
-      "check:lint"
+      "npm run check:lint --"
     ]
   }
 }
