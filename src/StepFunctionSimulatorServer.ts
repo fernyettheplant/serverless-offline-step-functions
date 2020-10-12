@@ -6,7 +6,6 @@ import type { StepFunctions } from 'aws-sdk';
 import type { StateMachines } from './types/StateMachine';
 import type { StateDefinition } from './types/State';
 import { StateMachineExecutor } from './StateMachineExecutor';
-import { StateMachineExecutor } from './StateMachineExecutor';
 
 export type StepFunctionSimulatorServerOptions = {
   port: number;

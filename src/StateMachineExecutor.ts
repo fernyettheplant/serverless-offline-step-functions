@@ -48,7 +48,7 @@ export class StateMachineExecutor {
       console.log('Output: \n', JSON.stringify(JSON.parse(stateExecutorOutput.json), null, 2), '\n');
       this.execute(this.stateMachine.definition.States[stateExecutorOutput.Next], stateExecutorOutput.json);
     } catch (error: unknown) {
-      // TODO: Error Handling for State Errors including FailState. Must be done HERE
+      // TODO: Error Handling for State Errors including FailState. Must be done
       console.error(error);
     }
   }
