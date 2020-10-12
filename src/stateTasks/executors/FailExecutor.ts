@@ -8,9 +8,8 @@ export class FailExecutor implements StateTypeExecutor {
     stateMachineName: string,
     stateName: string,
     definition: FailStateDefinition,
-    _inputJson: string | undefined,
   ): Promise<StateExecutorOutput> {
-    console.log(`* * * Failed On Purpose * * *`);
+    console.log(`StateMachine "${stateMachineName}" Failed on "${stateName}"`);
 
     throw new FailExecutorException(
       `StateMachine "${stateMachineName}" Failed on "${stateName}"`,
