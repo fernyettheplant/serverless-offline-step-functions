@@ -1,6 +1,11 @@
-# Serverless Offline Step Functions
+# Serverless Offline Step Functions **(STATUS: ALPHA)**
+
+![GitHub](https://img.shields.io/github/license/jefer590/serverless-offline-step-functions)
+![GitHub pull requests](https://img.shields.io/github/issues-pr/jefer590/serverless-offline-step-functions)
+![GitHub issues](https://img.shields.io/github/issues-raw/jefer590/serverless-offline-step-functions)
 
 Serverless Offline Plugin to Support Step Functions for Local Development.
+
 
 **Features**:
 
@@ -9,7 +14,7 @@ Serverless Offline Plugin to Support Step Functions for Local Development.
 
 ## Sponsor
 
-If the plugin is being useful to your company and want to keep the development active, consider buying me a coffee 🙂... coffee is the thing that makes me the most happy person in the world and I'd appreciate the sponsorship.
+If the plugin is being useful in your company and want to keep the development active, consider buying me a coffee 🙂... coffee is the thing that makes me the most happy person in the world and I'd appreciate the sponsorship.
 
 [![ko-fi](https://www.ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/Y8Y42C4E9)
 
@@ -26,6 +31,20 @@ $ npm i -D @fernthedev/serverless-offline-step-functions
 
 $ yarn add -D @fernthedev/serverless-offline-step-functions
 ```
+
+## Options
+
+The plugin contain a couple of options to configure in `custom`
+
+```yml
+custom:
+  '@fernthedev/serverless-offline-step-functions':
+    port: 8014
+    enabled: true
+```
+
+- `port`: Port of the Step Functions API Simulator (Default: 8014)
+- `enabled`: Enabled Step Function API Simulator (Default: true)
 
 ## Using it with Webpack
 
