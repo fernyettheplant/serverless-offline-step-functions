@@ -37,7 +37,7 @@ export type ChoiceRule = {
   IsPresent?: boolean;
   IsString?: boolean;
   IsTimestamp?: boolean;
-  Not?: ChoiceRule[];
+  Not?: ChoiceRule;
   NumericEquals?: number;
   NumericEqualsPath?: string;
   NumericGreaterThan?: number;
