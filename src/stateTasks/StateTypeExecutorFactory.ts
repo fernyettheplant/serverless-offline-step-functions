@@ -4,6 +4,7 @@ import { TaskExecutor } from './executors/TaskExecutor';
 import { PassExecutor } from './executors/PassExecutor';
 import { WaitExecutor } from './executors/WaitExecutor';
 import { ChoiceExecutor } from './executors/ChoiceExecutor';
+import { FailExecutor } from './executors/FailExecutor';
 
 export class StateTypeExecutorFactory {
   private static STATE_TYPE_MAP = new Map<StateType, StateTypeExecutor>([
@@ -11,6 +12,7 @@ export class StateTypeExecutorFactory {
     [StateType.Pass, new PassExecutor()],
     [StateType.Wait, new WaitExecutor()],
     [StateType.Choice, new ChoiceExecutor()],
+    [StateType.Fail, new FailExecutor()],
   ]);
 
   public static getExecutor(type: StateType): StateTypeExecutor {

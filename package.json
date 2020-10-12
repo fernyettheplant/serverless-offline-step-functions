@@ -4,7 +4,9 @@
   "description": "Serverless Offline Plugin to Support Step Functions for Local Development",
   "main": "dist/main.js",
   "types": "dist/main.d.ts",
-  "files": ["dist/**/*"],
+  "files": [
+    "dist/**/*"
+  ],
   "homepage": "https://github.com/jefer590/serverless-offline-step-functions#README",
   "repository": "github:jefer590/serverless-offline-step-functions",
   "author": "Fernando Alvarez <masterofer36@gmail.com>",
