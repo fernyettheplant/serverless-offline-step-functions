@@ -57,8 +57,10 @@
     "node": ">=10.0"
   },
   "husky": {
-    "commit-msg": "commitlint -E HUSKY_GIT_PARAMS",
-    "pre-commit": "npm run check:types && lint-staged"
+    "hooks": {
+      "commit-msg": "commitlint -E HUSKY_GIT_PARAMS",
+      "pre-commit": "lint-staged"
+    }
   },
   "lint-staged": {
     "*.ts": [
