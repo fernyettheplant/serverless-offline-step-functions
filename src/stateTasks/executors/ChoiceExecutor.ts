@@ -7,7 +7,7 @@ import type { ChoiceStateDefinition } from '../../types/State';
 import type { ChoiceRule } from '../../types/State';
 import type { StateExecutorOutput } from '../../types/StateExecutorOutput';
 
-export class ChoiceExector implements StateTypeExecutor {
+export class ChoiceExecutor implements StateTypeExecutor {
   public async execute(
     _stateMachineName: string,
     _stateName: string,
