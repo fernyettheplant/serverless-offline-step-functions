@@ -28,7 +28,7 @@ export type SucceedStateDefinition = {
 
 export type ChoiceRule = {
   Variable: string;
-  Next?: string;
+  Next: string;
   And?: ChoiceRule[];
   BooleanEquals?: boolean;
   BooleanEqualsPath?: string;

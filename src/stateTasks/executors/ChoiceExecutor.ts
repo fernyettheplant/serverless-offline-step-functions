@@ -9,34 +9,59 @@ import type { StateExecutorOutput } from '../../types/StateExecutorOutput';
 
 export class ChoiceExector implements StateTypeExecutor {
   public async execute(
-    stateMachineName: string,
-    stateName: string,
+    _stateMachineName: string,
+    _stateName: string,
     definition: ChoiceStateDefinition,
     json: string | undefined,
   ): Promise<StateExecutorOutput> {
     const input = this.processInput(json, definition);
+    let nextState: string | undefined = undefined;
 
     for (const choice of definition.Choices) {
-      // TODO: Handler AND, OR and NOT
+      if (choice.Not) {
+        const comparator = this.getComparatorFromChoice(choice.Not);
+        const evaluationPassed = !this.evaluateChoice(comparator, choice.Not, input);
 
-      const comparators = Object.keys(choice).filter((key) => key !== 'Variable' && key !== 'Next');
+        if (evaluationPassed) {
+          nextState = choice.Next;
+        }
+      } else if (choice.And && choice.And.length > 0) {
+        const evaluationPassed = choice.And.every((choiceAnd) => {
+          const comparator = this.getComparatorFromChoice(choiceAnd);
+          return this.evaluateChoice(comparator, choiceAnd, input);
+        });
 
-      if (comparators.length > 1) {
-        throw Error();
-      }
+        if (evaluationPassed) {
+          nextState = choice.Next;
+        }
+      } else if (choice.Or && choice.Or.length > 0) {
+        const evaluationPassed = choice.Or.some((choiceAnd) => {
+          const comparator = this.getComparatorFromChoice(choiceAnd);
+          return this.evaluateChoice(comparator, choiceAnd, input);
+        });
 
-      const evaluationPassed = this.evaluateChoice(comparators[0], choice, input);
-      if (evaluationPassed) {
-        //TODO: Set NEXT
-        break;
+        if (evaluationPassed) {
+          nextState = choice.Next;
+        }
+      } else {
+        const comparator = this.getComparatorFromChoice(choice);
+        const evaluationPassed = this.evaluateChoice(comparator, choice, input);
+        if (evaluationPassed) {
+          nextState = choice.Next;
+        }
       }
     }
 
-    // TODO: Maybe return the NextStep in here and the other executors?
+    if (!nextState && definition.Default) {
+      nextState = definition.Default;
+    } else {
+      throw new Error('No NextState or Default');
+    }
+
     return {
       json: this.processOutput(input, definition),
-      Next: 'end',
-      End: false,
+      Next: nextState,
+      End: false, // Not Supportted on Choice
     };
   }
 
@@ -121,5 +146,15 @@ export class ChoiceExector implements StateTypeExecutor {
 
   private checkLowerThanEquals(inputValue: string | number, choiceValue: string | number): boolean {
     return inputValue <= choiceValue;
+  }
+
+  private getComparatorFromChoice(choice: ChoiceRule): string {
+    const comparators = Object.keys(choice).filter((key) => key !== 'Variable' && key !== 'Next');
+
+    if (comparators.length > 1 || !comparators[0]) {
+      throw Error();
+    }
+
+    return comparators[0];
   }
 }
