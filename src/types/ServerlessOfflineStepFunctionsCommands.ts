@@ -7,6 +7,10 @@ export type ServerlessOfflineStepFunctionsCommands = CLIOptions & {
         usage: string;
         required: false;
       };
+      enabled: {
+        usage: string;
+        required: false;
+      };
     };
   };
 };

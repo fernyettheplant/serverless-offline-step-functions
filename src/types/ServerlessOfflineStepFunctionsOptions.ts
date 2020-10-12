@@ -1,3 +1,4 @@
 export type ServerlessOfflineStepFunctionsOptions = {
-  port: number;
+  port?: number;
+  enabled?: boolean;
 };

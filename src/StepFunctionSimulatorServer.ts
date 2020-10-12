@@ -31,7 +31,7 @@ export class StepFunctionSimulatorServer {
 
     try {
       httpServer = this.express.listen(this.options.port, () => {
-        this.logger.success(`Server ready: ${this.options.port} 🚀`);
+        this.logger.success(`Server ready on port ${this.options.port} 🚀`);
       });
     } catch (err) {
       this.logger.error(

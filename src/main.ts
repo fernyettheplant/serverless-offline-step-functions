@@ -9,15 +9,15 @@ import { StateInfoHandler } from './StateInfoHandler';
 import { Logger } from './utils/Logger';
 
 class ServerlessOfflineStepFunctionsPlugin {
-  public hooks: ServerlessOfflineHooks;
+  public hooks?: ServerlessOfflineHooks;
   public commands: ServerlessOfflineStepFunctionsCommands;
 
-  private serverless: any;
+  private serverless: Record<any, any>;
   private cliOptions: CLIOptions;
   private options?: ServerlessOfflineStepFunctionsOptions;
   private stepFunctionSimulatorServer?: StepFunctionSimulatorServer;
 
-  constructor(serverless: any, cliOptions: CLIOptions) {
+  constructor(serverless: Record<any, any>, cliOptions: CLIOptions) {
     this.serverless = serverless;
     this.cliOptions = cliOptions;
 
@@ -26,11 +26,24 @@ class ServerlessOfflineStepFunctionsPlugin {
         options: {
           port: {
             required: false,
-            usage: 'Port of the Step Functions API Simulator',
+            usage: 'Port of the Step Functions API Simulator (Default: 8014)',
+          },
+          enabled: {
+            required: false,
+            usage: 'Enabled Step Function API Simulator (Default: true)',
           },
         },
       },
     };
+
+    this.mergeOptions();
+
+    console.log(this.options);
+    if (this.options?.enabled === false) {
+      // Simulator Will not be executed
+      Logger.getInstance().warning('Simulator will not execute.');
+      return;
+    }
 
     this.hooks = {
       'before:offline:start:init': this.start.bind(this),
@@ -40,8 +53,6 @@ class ServerlessOfflineStepFunctionsPlugin {
   }
 
   private start() {
-    this.mergeOptions();
-
     // Get Handler and Path of the Local Functions
     const definedStateMachines = this.serverless.service.initialServerlessConfig?.stepFunctions?.stateMachines;
 
