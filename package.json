@@ -1,6 +1,6 @@
 {
   "name": "@fernthedev/serverless-offline-step-functions",
-  "version": "0.0.1",
+  "version": "1.0.0-alpha.1",
   "description": "Serverless Offline Plugin to Support Step Functions for Local Development",
   "main": "dist/main.js",
   "types": "dist/main.d.ts",
@@ -16,7 +16,9 @@
     "check:lint": "eslint '*/**/*.ts'",
     "check:types": "tsc --noEmit",
     "compile": "tsc",
-    "compile:watch": "tsc --watch"
+    "compile:watch": "tsc --watch",
+    "prepare": "npm run compile",
+    "prepublishOnly": "npm run check:lint"
   },
   "bugs": {
     "url": "https://github.com/jefer590/serverless-offline-step-functions/issues"
