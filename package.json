@@ -1,17 +1,20 @@
 {
   "name": "@fernthedev/serverless-offline-step-functions",
-  "version": "1.0.0-alpha.2",
+  "version": "1.0.0-alpha.3",
   "description": "Serverless Offline Plugin to Support Step Functions for Local Development",
   "main": "dist/main.js",
   "types": "dist/main.d.ts",
   "files": [
-    "./dist/**/*"
+    "dist"
   ],
   "homepage": "https://github.com/jefer590/serverless-offline-step-functions#README",
   "repository": "github:jefer590/serverless-offline-step-functions",
   "author": "Fernando Alvarez <masterofer36@gmail.com>",
   "license": "MIT",
   "private": false,
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "check:lint": "eslint '*/**/*.ts'",
     "check:types": "tsc --noEmit",
