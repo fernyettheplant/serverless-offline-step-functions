@@ -6,6 +6,7 @@ import type { StepFunctions } from 'aws-sdk';
 import type { StateMachines } from './types/StateMachine';
 import type { StateDefinition } from './types/State';
 import { StateMachineExecutor } from './StateMachineExecutor';
+import { StateMachineExecutor } from './StateMachineExecutor';
 
 export type StepFunctionSimulatorServerOptions = {
   port: number;
@@ -59,7 +60,7 @@ export class StepFunctionSimulatorServer {
     this.express.use(this.resolveStateMachine.bind(this));
   }
 
-  private resolveStateMachine(req: Request, res: Response) {
+  private async resolveStateMachine(req: Request, res: Response) {
     console.log(`${this.logPrefix} Got request for ${req.method} ${req.url}`);
 
     const executionInput: StepFunctions.Types.StartExecutionInput = req.body;
@@ -74,15 +75,16 @@ export class StepFunctionSimulatorServer {
       stateMachineToExecute.definition.States[stateMachineToExecute.definition.StartAt];
     const sme = new StateMachineExecutor(stateMachineToExecute);
 
-    // TODO: check integration type to set input properly (i.e. lambda vs. sns)
-    sme.execute(startAtState, JSON.stringify(executionInput.input));
+    const promiseResponse = await new Promise((resolve) => {
+      // per docs, step execution response includes the start date and execution arn
+      const output: StepFunctions.Types.StartExecutionOutput = {
+        startDate: sme.startDate,
+        executionArn: sme.executionArn,
+      };
 
-    // per docs, step execution response includes the start date and execution arn
-    const output: StepFunctions.Types.StartExecutionOutput = {
-      startDate: sme.startDate,
-      executionArn: sme.executionArn,
-    };
+      resolve(res.status(200).json(output));
+    });
 
-    return res.status(200).json(output);
+    await sme.execute(startAtState, JSON.stringify(executionInput.input));
   }
 }

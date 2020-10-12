@@ -11,10 +11,12 @@ export class FailExecutor implements StateTypeExecutor {
   ): Promise<StateExecutorOutput> {
     console.log(`StateMachine "${stateMachineName}" Failed on "${stateName}"`);
 
-    throw new FailExecutorException(
-      `StateMachine "${stateMachineName}" Failed on "${stateName}"`,
-      definition.Cause,
-      definition.Error,
+    return Promise.reject(
+      new FailExecutorException(
+        `StateMachine "${stateMachineName}" Failed on "${stateName}"`,
+        definition.Cause,
+        definition.Error,
+      ),
     );
   }
 }

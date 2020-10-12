@@ -2,6 +2,7 @@ import type { StateMachine } from './types/StateMachine';
 import type { StateDefinition } from './types/State';
 
 import { StateTypeExecutorFactory } from './stateTasks/StateTypeExecutorFactory';
+import { StateExecutorOutput } from './types/StateExecutorOutput';
 
 export class StateMachineExecutor {
   private readonly stateMachine: StateMachine;
@@ -23,26 +24,33 @@ export class StateMachineExecutor {
     const typeExecutor = StateTypeExecutorFactory.getExecutor(stateDefinition.Type);
 
     // Execute State
-    const stateExecutorOutput = await typeExecutor.execute(
-      this.stateMachine.name,
-      this.currentStateName,
-      stateDefinition,
-      inputJson,
-    );
+    let stateExecutorOutput: StateExecutorOutput;
 
-    if (stateExecutorOutput.End) {
-      console.log('State Machine Ended');
-      return stateExecutorOutput.json;
+    try {
+      stateExecutorOutput = await typeExecutor.execute(
+        this.stateMachine.name,
+        this.currentStateName,
+        stateDefinition,
+        inputJson,
+      );
+
+      if (stateExecutorOutput.End) {
+        console.log('State Machine Ended');
+        return stateExecutorOutput.json;
+      }
+
+      if (!stateExecutorOutput.Next) {
+        throw new Error('Should have ended');
+      }
+
+      // Call recursivly State Machine Executor until no more states
+      this.currentStateName = stateExecutorOutput.Next;
+      console.log('Output: \n', JSON.stringify(JSON.parse(stateExecutorOutput.json), null, 2), '\n');
+      this.execute(this.stateMachine.definition.States[stateExecutorOutput.Next], stateExecutorOutput.json);
+    } catch (error: unknown) {
+      // TODO: Error Handling for State Errors including FailState. Must be done HERE
+      console.error(error);
     }
-
-    if (!stateExecutorOutput.Next) {
-      throw new Error('Should have ended');
-    }
-
-    // Call recursivly State Machine Executor until no more states
-    this.currentStateName = stateExecutorOutput.Next;
-    console.log('Output: \n', JSON.stringify(JSON.parse(stateExecutorOutput.json), null, 2), '\n');
-    this.execute(this.stateMachine.definition.States[stateExecutorOutput.Next], stateExecutorOutput.json);
   }
 
   get startDate(): Date {
