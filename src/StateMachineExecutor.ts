@@ -2,7 +2,6 @@ import type { StateMachine } from './types/StateMachine';
 import type { StateDefinition } from './types/State';
 
 import { StateTypeExecutorFactory } from './stateTasks/StateTypeExecutorFactory';
-import { StateType } from './stateTasks/StateType';
 
 export class StateMachineExecutor {
   private readonly stateMachine: StateMachine;
@@ -24,23 +23,26 @@ export class StateMachineExecutor {
     const typeExecutor = StateTypeExecutorFactory.getExecutor(stateDefinition.Type);
 
     // Execute State
-    //TODO: Perhaps return what is the next state?
-    const outputJson = await typeExecutor.execute(
+    const stateExecutorOutput = await typeExecutor.execute(
       this.stateMachine.name,
       this.currentStateName,
       stateDefinition,
       inputJson,
     );
 
-    if ([StateType.Succeed, StateType.Fail].includes(stateDefinition.Type) || stateDefinition.End) {
+    if (stateExecutorOutput.End) {
       console.log('State Machine Ended');
-      return outputJson;
+      return stateExecutorOutput.json;
+    }
+
+    if (!stateExecutorOutput.Next) {
+      throw new Error('Should have ended');
     }
 
     // Call recursivly State Machine Executor until no more states
-    this.currentStateName = stateDefinition.Next;
-    console.log('Output: \n', JSON.stringify(JSON.parse(outputJson), null, 2), '\n');
-    this.execute(this.stateMachine.definition.States[stateDefinition.Next], outputJson);
+    this.currentStateName = stateExecutorOutput.Next;
+    console.log('Output: \n', JSON.stringify(JSON.parse(stateExecutorOutput.json), null, 2), '\n');
+    this.execute(this.stateMachine.definition.States[stateExecutorOutput.Next], stateExecutorOutput.json);
   }
 
   get startDate(): Date {

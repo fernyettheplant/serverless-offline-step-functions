@@ -3,6 +3,7 @@ import { JSONPath } from 'jsonpath-plus';
 import { StateProcessor } from '../../StateProcessor';
 
 import type { WaitStateDefinition } from '../../types/State';
+import type { StateExecutorOutput } from '../../types/StateExecutorOutput';
 import { validateTimestamp } from '../../utils/validateTimestamp';
 import { StateTypeExecutor } from '../StateTypeExecutor';
 
@@ -12,7 +13,7 @@ export class WaitExecutor implements StateTypeExecutor {
     _stateName: string,
     definition: WaitStateDefinition,
     inputJson: string | undefined,
-  ): Promise<string> {
+  ): Promise<StateExecutorOutput> {
     const input = this.processInput(inputJson, definition);
     let secondstoPrint: number | undefined;
     let datetoPrint: string | undefined;
@@ -51,7 +52,11 @@ export class WaitExecutor implements StateTypeExecutor {
     // Wait
     await delay(millisecondsToWait);
 
-    return this.processOutput(input, definition);
+    return {
+      Next: definition.Next,
+      End: definition.End,
+      json: this.processOutput(input, definition),
+    };
   }
 
   private processInput(json: string | undefined, stateDefinition: WaitStateDefinition): string {

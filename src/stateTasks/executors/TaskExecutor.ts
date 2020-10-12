@@ -2,6 +2,7 @@ import { promises as fs, constants as FsConstants } from 'fs';
 import path from 'path';
 
 import type { StateTypeExecutor } from '../StateTypeExecutor';
+import type { StateExecutorOutput } from '../../types/StateExecutorOutput';
 import type { TaskStateDefinition } from '../../types/State';
 
 import { StateInfoHandler } from '../../StateInfoHandler';
@@ -13,7 +14,7 @@ export class TaskExecutor implements StateTypeExecutor {
     stateName: string,
     stateDefinition: TaskStateDefinition,
     inputJson: string | undefined,
-  ): Promise<any> {
+  ): Promise<StateExecutorOutput> {
     const statesInfoHandler = StateInfoHandler.getInstance();
     const stateInfo = statesInfoHandler.getStateInfo(stateMachineName, stateName);
 
@@ -31,7 +32,11 @@ export class TaskExecutor implements StateTypeExecutor {
 
     const outputJson = this.processOutput(output, stateDefinition);
 
-    return outputJson;
+    return {
+      Next: stateDefinition.Next,
+      End: stateDefinition.End,
+      json: outputJson,
+    };
   }
 
   private processInput(json: string | undefined, stateDefinition: TaskStateDefinition): any {

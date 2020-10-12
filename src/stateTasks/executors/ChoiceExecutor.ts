@@ -1,8 +1,11 @@
 import { JSONPath } from 'jsonpath-plus';
-import type { ChoiceStateDefinition } from '../../types/State';
-import type { ChoiceRule } from '../../types/State';
+
 import { StateProcessor } from '../../StateProcessor';
 import { StateTypeExecutor } from '../StateTypeExecutor';
+
+import type { ChoiceStateDefinition } from '../../types/State';
+import type { ChoiceRule } from '../../types/State';
+import type { StateExecutorOutput } from '../../types/StateExecutorOutput';
 
 export class ChoiceExector implements StateTypeExecutor {
   public async execute(
@@ -10,7 +13,7 @@ export class ChoiceExector implements StateTypeExecutor {
     stateName: string,
     definition: ChoiceStateDefinition,
     json: string | undefined,
-  ): Promise<string> {
+  ): Promise<StateExecutorOutput> {
     const input = this.processInput(json, definition);
 
     for (const choice of definition.Choices) {
@@ -30,7 +33,11 @@ export class ChoiceExector implements StateTypeExecutor {
     }
 
     // TODO: Maybe return the NextStep in here and the other executors?
-    return this.processOutput(input, definition);
+    return {
+      json: this.processOutput(input, definition),
+      Next: 'end',
+      End: false,
+    };
   }
 
   private processInput(json: string | undefined, stateDefinition: ChoiceStateDefinition): string {
