@@ -6,7 +6,6 @@
 
 Serverless Offline Plugin to Support Step Functions for Local Development.
 
-
 **Features**:
 
 - Fully Written in TypeScript
