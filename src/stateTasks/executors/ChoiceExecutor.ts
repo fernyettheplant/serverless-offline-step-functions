@@ -18,37 +18,30 @@ export class ChoiceExector implements StateTypeExecutor {
     let nextState: string | undefined = undefined;
 
     for (const choice of definition.Choices) {
+      let evaluationPassed = false;
+
       if (choice.Not) {
         const comparator = this.getComparatorFromChoice(choice.Not);
-        const evaluationPassed = !this.evaluateChoice(comparator, choice.Not, input);
-
-        if (evaluationPassed) {
-          nextState = choice.Next;
-        }
+        evaluationPassed = !this.evaluateChoice(comparator, choice.Not, input);
       } else if (choice.And && choice.And.length > 0) {
-        const evaluationPassed = choice.And.every((choiceAnd) => {
+        evaluationPassed = choice.And.every((choiceAnd) => {
           const comparator = this.getComparatorFromChoice(choiceAnd);
           return this.evaluateChoice(comparator, choiceAnd, input);
         });
-
-        if (evaluationPassed) {
-          nextState = choice.Next;
-        }
       } else if (choice.Or && choice.Or.length > 0) {
-        const evaluationPassed = choice.Or.some((choiceAnd) => {
+        evaluationPassed = choice.Or.some((choiceAnd) => {
           const comparator = this.getComparatorFromChoice(choiceAnd);
           return this.evaluateChoice(comparator, choiceAnd, input);
         });
-
-        if (evaluationPassed) {
-          nextState = choice.Next;
-        }
       } else {
+        // Normal ChoiceRule
         const comparator = this.getComparatorFromChoice(choice);
-        const evaluationPassed = this.evaluateChoice(comparator, choice, input);
-        if (evaluationPassed) {
-          nextState = choice.Next;
-        }
+        evaluationPassed = this.evaluateChoice(comparator, choice, input);
+      }
+
+      if (evaluationPassed) {
+        nextState = choice.Next;
+        break; // We got already our branch. time to short circuit
       }
     }
 
