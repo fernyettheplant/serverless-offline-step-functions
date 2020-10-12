@@ -99,7 +99,24 @@ class ServerlessOfflineStepFunctionsPlugin {
           break;
         }
 
-        const functionName = (stateOptions as any).Resource.split('-').slice(-1)[0];
+        let functionName: string | undefined;
+        const resource: string | Record<string, string[]> = (stateOptions as any).Resource;
+
+        if (typeof resource === 'string') {
+          functionName = resource.split('-').slice(-1)[0];
+        } else {
+          // probably an object
+          for (const [key, value] of Object.entries(resource)) {
+            if (key === 'Fn::GetAtt') {
+              functionName = value[0];
+            }
+          }
+        }
+
+        if (!functionName) {
+          throw Error();
+        }
+
         const { handler } = definedFunctions[functionName];
         const indexOfHandlerNameSeparator = handler.lastIndexOf('.');
         const handlerPath = handler.substring(0, indexOfHandlerNameSeparator);
