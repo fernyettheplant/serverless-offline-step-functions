@@ -4,10 +4,17 @@ import { StateProcessor } from '../../StateProcessor';
 
 import type { WaitStateDefinition } from '../../types/State';
 import type { StateExecutorOutput } from '../../types/StateExecutorOutput';
+import { Logger } from '../../utils/Logger';
 import { validateTimestamp } from '../../utils/validateTimestamp';
 import { StateTypeExecutor } from '../StateTypeExecutor';
 
 export class WaitExecutor implements StateTypeExecutor {
+  private readonly logger: Logger;
+
+  constructor() {
+    this.logger = Logger.getInstance();
+  }
+
   public async execute(
     _stateMachineName: string,
     _stateName: string,
@@ -44,9 +51,9 @@ export class WaitExecutor implements StateTypeExecutor {
 
     // Log for Visibility Sake
     if (datetoPrint) {
-      console.log(`* * Will Wait Until ${datetoPrint} * *`);
+      this.logger.log(`* * Will Wait Until ${datetoPrint} * *`);
     } else if (secondstoPrint) {
-      console.log(`* * Will Wait ${secondstoPrint} Seconds * *`);
+      this.logger.log(`* * Will Wait ${secondstoPrint} Seconds * *`);
     }
 
     // Wait

@@ -1,11 +1,11 @@
 import { createHttpTerminator, HttpTerminator } from 'http-terminator';
-import chalk from 'chalk';
 import express, { Express, Request, Response } from 'express';
 import type { StepFunctions } from 'aws-sdk';
 
 import type { StateMachines } from './types/StateMachine';
 import type { StateDefinition } from './types/State';
 import { StateMachineExecutor } from './StateMachineExecutor';
+import { Logger } from './utils/Logger';
 
 export type StepFunctionSimulatorServerOptions = {
   port: number;
@@ -17,10 +17,11 @@ export class StepFunctionSimulatorServer {
   private httpTerminator?: HttpTerminator;
   // TODO: Move State Machines and type it
   private options: StepFunctionSimulatorServerOptions;
-  private logPrefix = chalk.magenta('[Step Functions API Simulator]');
+  private readonly logger: Logger;
 
   constructor(options: StepFunctionSimulatorServerOptions) {
     this.options = options;
+    this.logger = Logger.getInstance();
     this.express = express();
     this.setupMiddlewares();
   }
@@ -30,10 +31,12 @@ export class StepFunctionSimulatorServer {
 
     try {
       httpServer = this.express.listen(this.options.port, () => {
-        console.log(`${this.logPrefix} server ready: ${this.options.port} 🚀`);
+        this.logger.success(`Server ready: ${this.options.port} 🚀`);
       });
     } catch (err) {
-      console.error(`Unexpected error while starting serverless-offline server on port ${this.options.port}:`, err);
+      this.logger.error(
+        `Unexpected error while starting serverless-offline server on port ${this.options.port}: ${err.stack}`,
+      );
       process.exit(1);
     }
 
@@ -41,7 +44,7 @@ export class StepFunctionSimulatorServer {
   }
 
   public async shutdown(): Promise<void> {
-    console.log('Killing Step Functions API Simulator');
+    this.logger.warning('Killing Step Functions API Simulator 🔪');
     await this.httpTerminator?.terminate();
   }
 
@@ -60,7 +63,7 @@ export class StepFunctionSimulatorServer {
   }
 
   private async resolveStateMachine(req: Request, res: Response) {
-    console.log(`${this.logPrefix} Got request for ${req.method} ${req.url}`);
+    this.logger.log(`Got request for ${req.method} ${req.url}`);
 
     const executionInput: StepFunctions.Types.StartExecutionInput = req.body;
     const stateMachineName: string = executionInput.stateMachineArn.split(':').slice(-1)[0];
@@ -74,7 +77,7 @@ export class StepFunctionSimulatorServer {
       stateMachineToExecute.definition.States[stateMachineToExecute.definition.StartAt];
     const sme = new StateMachineExecutor(stateMachineToExecute);
 
-    const promiseResponse = await new Promise((resolve) => {
+    await new Promise((resolve) => {
       // per docs, step execution response includes the start date and execution arn
       const output: StepFunctions.Types.StartExecutionOutput = {
         startDate: sme.startDate,

@@ -6,6 +6,7 @@ import type {
 import type { ServerlessOfflineHooks } from './types/ServerlessOfflineHooks';
 import { StepFunctionSimulatorServer } from './StepFunctionSimulatorServer';
 import { StateInfoHandler } from './StateInfoHandler';
+import { Logger } from './utils/Logger';
 
 class ServerlessOfflineStepFunctionsPlugin {
   public hooks: ServerlessOfflineHooks;

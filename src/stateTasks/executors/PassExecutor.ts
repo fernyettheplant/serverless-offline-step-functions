@@ -1,16 +1,23 @@
-import { StateProcessor } from '../../StateProcessor';
-import { StateTypeExecutor } from '../StateTypeExecutor';
 import type { StateExecutorOutput } from '../../types/StateExecutorOutput';
 import type { PassStateDefinition } from '../../types/State';
+import { StateProcessor } from '../../StateProcessor';
+import { StateTypeExecutor } from '../StateTypeExecutor';
+import { Logger } from '../../utils/Logger';
 
 export class PassExecutor implements StateTypeExecutor {
+  private readonly logger: Logger;
+
+  constructor() {
+    this.logger = Logger.getInstance();
+  }
+
   public execute(
     _stateMachineName: string,
     stateName: string,
     definition: PassStateDefinition,
     json: string | undefined,
   ): Promise<StateExecutorOutput> {
-    console.log(`* * * Passed Task ${stateName} * * *`);
+    this.logger.log(`* * * Passed Task ${stateName} * * *`);
     const input = this.processInput(json, definition);
 
     return Promise.resolve({
