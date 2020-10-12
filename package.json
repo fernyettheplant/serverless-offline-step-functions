@@ -1,11 +1,11 @@
 {
   "name": "@fernthedev/serverless-offline-step-functions",
-  "version": "1.0.0-alpha.1",
+  "version": "1.0.0-alpha.2",
   "description": "Serverless Offline Plugin to Support Step Functions for Local Development",
   "main": "dist/main.js",
   "types": "dist/main.d.ts",
   "files": [
-    "dist/**/*"
+    "./dist/**/*"
   ],
   "homepage": "https://github.com/jefer590/serverless-offline-step-functions#README",
   "repository": "github:jefer590/serverless-offline-step-functions",
