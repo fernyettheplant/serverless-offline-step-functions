@@ -36,9 +36,9 @@ class ServerlessOfflineStepFunctionsPlugin {
       },
     };
 
+    this.injectEnvVars();
     this.mergeOptions();
 
-    console.log(this.options);
     if (this.options?.enabled === false) {
       // Simulator Will not be executed
       Logger.getInstance().warning('Simulator will not execute.');
@@ -125,6 +125,26 @@ class ServerlessOfflineStepFunctionsPlugin {
         statesInfoHandler.setStateInfo(stateMachineName, stateName, handlerPath, handlerName);
       }
     }
+  }
+
+  private injectEnvVars() {
+    const providerEnvironment: Record<string, string> | undefined = this.serverless.service.initialServerlessConfig
+      ?.provider?.environment;
+
+    if (providerEnvironment) {
+      Object.entries(providerEnvironment).forEach(([key, value]) => {
+        process.env[key] = value;
+      });
+    }
+
+    Object.values(this.serverless.service.initialServerlessConfig?.functions)
+      .filter((value) => (value as any)['environment'])
+      .map((value) => (value as any)['environment'])
+      .forEach((envObj) => {
+        Object.entries(envObj).forEach(([key, value]) => {
+          (process.env as any)[key] = value;
+        });
+      });
   }
 }
 
