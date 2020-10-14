@@ -87,6 +87,6 @@ export class StepFunctionSimulatorServer {
       resolve(res.status(200).json(output));
     });
 
-    await sme.execute(startAtState, JSON.stringify(executionInput.input));
+    await sme.execute(startAtState, executionInput.input);
   }
 }
