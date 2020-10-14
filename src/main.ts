@@ -36,7 +36,6 @@ class ServerlessOfflineStepFunctionsPlugin {
       },
     };
 
-    this.injectEnvVars();
     this.mergeOptions();
 
     if (this.options?.enabled === false) {
@@ -53,6 +52,7 @@ class ServerlessOfflineStepFunctionsPlugin {
   }
 
   private start() {
+    this.injectEnvVars();
     // Get Handler and Path of the Local Functions
     const definedStateMachines = this.serverless.service.initialServerlessConfig?.stepFunctions?.stateMachines;
 
