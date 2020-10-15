@@ -4,6 +4,7 @@ import { StateType } from '../stateTasks/StateType';
 export type StateInfo = {
   handlerPath: string;
   handlerName: string;
+  environment: Record<string, string> | undefined;
 };
 
 type CommonStateDefinition = {

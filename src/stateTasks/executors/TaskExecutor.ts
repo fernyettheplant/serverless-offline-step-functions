@@ -28,7 +28,9 @@ export class TaskExecutor implements StateTypeExecutor {
     const lambdaPath = await this.getWebpackOrCommonFuction(stateInfo.handlerPath);
     const functionLambda = await import(`${lambdaPath}`);
 
+    this.injectEnvVarsLambdaSpecific(stateInfo.environment);
     const output = await functionLambda[stateInfo.handlerName](input, context);
+    this.removeEnvVarsLambdaSpecific(stateInfo.environment);
 
     const outputJson = this.processOutput(output, stateDefinition);
 
@@ -68,5 +70,25 @@ export class TaskExecutor implements StateTypeExecutor {
     }
 
     return filePathResolved;
+  }
+
+  private async injectEnvVarsLambdaSpecific(lambdaEnv: Record<string, string> | undefined): void {
+    if (!lambdaEnv) {
+      return;
+    }
+
+    Object.entries(lambdaEnv).forEach(([key, value]) => {
+      process.env[key] = value;
+    });
+  }
+
+  private async removeEnvVarsLambdaSpecific(lambdaEnv: Record<string, string> | undefined): void {
+    if (!lambdaEnv) {
+      return;
+    }
+
+    Object.keys(lambdaEnv).forEach((key) => {
+      delete process.env[key];
+    });
   }
 }
