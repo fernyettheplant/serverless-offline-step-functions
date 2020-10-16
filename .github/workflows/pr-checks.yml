@@ -3,20 +3,6 @@ name: PR Checks
 on: [pull_request]
 
 jobs:
-  eslint:
-    name: ESLint
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v2
-
-      - name: ESLint
-        uses: reviewdog/action-eslint@master
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }} # auto generated
-          reporter: github-pr-check
-          fail_on_error: true
-
   tsc:
     name: TypeCheck
     runs-on: ubuntu-latest
@@ -27,11 +13,25 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@master
         with:
-          node-version: '12'
+          node-version: "12"
           check-latest: true
 
       - name: Install Dependencies
         run: npm ci
-      
+
       - name: tsc
         uses: icrawl/action-tsc@master
+
+  eslint:
+    name: ESLint
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v2
+
+      - name: ESLint
+        uses: reviewdog/action-eslint@v1
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }} # auto generated
+          reporter: github-pr-check
+          fail_on_error: true
