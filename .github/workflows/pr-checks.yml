@@ -1,0 +1,17 @@
+name: PR Checks
+
+on: [pull_request]
+
+jobs:
+  eslint:
+    name: ESLint
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v2
+
+      - name: ESLint
+        uses: reviewdog/action-eslint@master
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }} # auto generated
+          reporter: github-pr-review # Change reporter.
