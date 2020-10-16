@@ -23,7 +23,7 @@ jobs:
         run: "npm run check:types"
 
   eslint:
-    name: ESLint
+    name: Lint Check
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repository

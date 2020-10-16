@@ -15,7 +15,7 @@ export class FailExecutor implements StateTypeExecutor {
     stateMachineName: string,
     stateName: string,
     definition: FailStateDefinition,
-  ): Promise<StateExecutorOutput> {
+  ): StateExecutorOutput {
     this.logger.error(`StateMachine "${stateMachineName}" Failed on "${stateName}"`);
 
     return Promise.reject(
