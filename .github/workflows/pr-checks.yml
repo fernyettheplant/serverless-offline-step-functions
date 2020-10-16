@@ -20,7 +20,7 @@ jobs:
         run: npm ci
 
       - name: tsc
-        uses: icrawl/action-tsc@master
+        uses: npm run check:type
 
   eslint:
     name: ESLint
