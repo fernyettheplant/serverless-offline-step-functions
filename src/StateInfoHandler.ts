@@ -17,10 +17,17 @@ export class StateInfoHandler {
     return this.INSTANCE;
   }
 
-  public setStateInfo(stateMachineName: string, stateName: string, handlerPath: string, handlerName: string): void {
+  public setStateInfo(
+    stateMachineName: string,
+    stateName: string,
+    handlerPath: string,
+    handlerName: string,
+    environment: Record<string, string> | undefined,
+  ): void {
     this.statesHandlersMap.set(`${stateMachineName}+${stateName}`, {
       handlerName,
       handlerPath,
+      environment,
     });
   }
 

@@ -53,7 +53,7 @@ class ServerlessOfflineStepFunctionsPlugin {
   }
 
   private start() {
-    this.injectEnvVars();
+    this.injectGlobalEnvVars();
     // Get Handler and Path of the Local Functions
     const definedStateMachines = this.serverless.service.initialServerlessConfig?.stepFunctions?.stateMachines;
 
@@ -127,13 +127,15 @@ class ServerlessOfflineStepFunctionsPlugin {
         const indexOfHandlerNameSeparator = handler.lastIndexOf('.');
         const handlerPath = handler.substring(0, indexOfHandlerNameSeparator);
         const handlerName = handler.substring(indexOfHandlerNameSeparator + 1);
+        const environment: Record<string, string> | undefined = this.serverless.service.initialServerlessConfig
+          ?.functions[functionName]?.environment;
 
-        statesInfoHandler.setStateInfo(stateMachineName, stateName, handlerPath, handlerName);
+        statesInfoHandler.setStateInfo(stateMachineName, stateName, handlerPath, handlerName, environment);
       }
     }
   }
 
-  private injectEnvVars() {
+  private injectGlobalEnvVars() {
     const providerEnvironment: Record<string, string> | undefined = this.serverless.service.initialServerlessConfig
       ?.provider?.environment;
 
@@ -142,15 +144,6 @@ class ServerlessOfflineStepFunctionsPlugin {
         process.env[key] = value;
       });
     }
-
-    Object.values(this.serverless.service.initialServerlessConfig?.functions)
-      .filter((value) => (value as any)['environment'])
-      .map((value) => (value as any)['environment'])
-      .forEach((envObj) => {
-        Object.entries(envObj).forEach(([key, value]) => {
-          (process.env as any)[key] = value;
-        });
-      });
   }
 }
 
