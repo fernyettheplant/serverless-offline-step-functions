@@ -105,12 +105,13 @@ export type TaskCatchRule = {
   ResultPath?: string;
 };
 
-type TaskStateParameters = {
+type LambdaTaskStateParameters = {
   FunctionName?: string | { 'Fn::GetAtt': [string, string] };
   Payload?: Record<string, unknown>;
 };
 
-export type PayloadTemplate = TaskStateParameters & Record<string, unknown>;
+export type PayloadTemplate = LambdaTaskStateParameters &
+  Record<string, unknown>;
 
 export type TaskStateDefinition = CommonStateDefinition & {
   Resource: string;
