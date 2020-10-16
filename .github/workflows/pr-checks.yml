@@ -20,7 +20,7 @@ jobs:
         run: npm ci
 
       - name: tsc
-        uses: npm run check:type
+        uses: npm run check:types
 
   eslint:
     name: ESLint
