@@ -5,12 +5,12 @@ export class Logger {
   private static INSTANCE: Logger;
   private readonly logPrefix = chalk.magenta('[Step Functions API Simulator]');
 
-  public static getInstance(): Logger {
+  public static getInstance():Logger {
     if (!this.INSTANCE) {
-      this.INSTANCE = new Logger();
+      this.INSTANCE = new Logger()
     }
 
-    return this.INSTANCE;
+    return this.INSTANCE
   }
 
   public success(message: string): void {
@@ -26,6 +26,6 @@ export class Logger {
   }
 
   public warning(messageError: string): void {
-    consola.warn(`${this.logPrefix} ${chalk.yellow(messageError)}`);
+    consola.warn(`${this.logPrefix} ${chalk.yellow(messageError)}`)
   }
 }
