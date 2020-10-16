@@ -15,3 +15,4 @@ jobs:
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }} # auto generated
           reporter: github-pr-check
+          fail_on_error: true
