@@ -19,8 +19,8 @@ jobs:
       - name: Install Dependencies
         run: npm ci
 
-      - name: tsc
-        run: npm run check:types
+      - name: Run Check Types
+        run: "npm run check:types"
 
   eslint:
     name: ESLint
