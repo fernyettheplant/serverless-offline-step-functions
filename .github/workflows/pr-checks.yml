@@ -14,4 +14,4 @@ jobs:
         uses: reviewdog/action-eslint@master
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }} # auto generated
-          reporter: github-pr-check # Change reporter.
+          reporter: github-pr-check
