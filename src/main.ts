@@ -122,7 +122,7 @@ class ServerlessOfflineStepFunctionsPlugin {
         const handlerPath = handler.substring(0, indexOfHandlerNameSeparator);
         const handlerName = handler.substring(indexOfHandlerNameSeparator + 1);
         const environment: Record<string, string> | undefined = this.serverless.service.initialServerlessConfig
-          ?.functions[handlerName]?.environment;
+          ?.functions[functionName]?.environment;
 
         statesInfoHandler.setStateInfo(stateMachineName, stateName, handlerPath, handlerName, environment);
       }

@@ -72,7 +72,7 @@ export class TaskExecutor implements StateTypeExecutor {
     return filePathResolved;
   }
 
-  private async injectEnvVarsLambdaSpecific(lambdaEnv: Record<string, string> | undefined): void {
+  private injectEnvVarsLambdaSpecific(lambdaEnv: Record<string, string> | undefined): void {
     if (!lambdaEnv) {
       return;
     }
@@ -82,7 +82,7 @@ export class TaskExecutor implements StateTypeExecutor {
     });
   }
 
-  private async removeEnvVarsLambdaSpecific(lambdaEnv: Record<string, string> | undefined): void {
+  private removeEnvVarsLambdaSpecific(lambdaEnv: Record<string, string> | undefined): void {
     if (!lambdaEnv) {
       return;
     }
