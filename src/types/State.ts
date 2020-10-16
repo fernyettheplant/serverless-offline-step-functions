@@ -104,9 +104,16 @@ export type TaskCatchRule = {
   ResultPath?: string;
 };
 
+type TaskStateParameters = {
+  FunctionName?: string | { 'Fn::GetAtt': [string, string] };
+  Payload?: Record<string, unknown>;
+};
+
+export type PayloadTemplate = TaskStateParameters & Record<string, unknown>;
+
 export type TaskStateDefinition = CommonStateDefinition & {
   Resource: string;
-  Parameters?: string; // TODO: TBD
+  Parameters?: PayloadTemplate;
   ResultPath?: string;
   ResultSelector?: string;
   Retry?: TaskRetryRule[];

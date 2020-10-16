@@ -7,6 +7,7 @@ import type { ServerlessOfflineHooks } from './types/ServerlessOfflineHooks';
 import { StepFunctionSimulatorServer } from './StepFunctionSimulatorServer';
 import { StateInfoHandler } from './StateInfoHandler';
 import { Logger } from './utils/Logger';
+import { TaskStateDefinition } from './types/State';
 
 class ServerlessOfflineStepFunctionsPlugin {
   public hooks?: ServerlessOfflineHooks;
@@ -102,8 +103,13 @@ class ServerlessOfflineStepFunctionsPlugin {
         let functionName: string | undefined;
         const resource: string | Record<string, string[]> = (stateOptions as any).Resource;
 
+        // TODO: To extract this to a function/class
         if (typeof resource === 'string') {
-          functionName = resource.split('-').slice(-1)[0];
+          if (resource.endsWith('.waitForTaskToken')) {
+            functionName = (stateOptions as TaskStateDefinition).Parameters?.FunctionName?.['Fn::GetAtt'][0];
+          } else {
+            functionName = resource.split('-').slice(-1)[0];
+          }
         } else {
           // probably an object
           for (const [key, value] of Object.entries(resource)) {

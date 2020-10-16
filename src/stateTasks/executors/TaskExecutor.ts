@@ -41,9 +41,17 @@ export class TaskExecutor implements StateTypeExecutor {
 
   private processInput(json: string | undefined, stateDefinition: TaskStateDefinition): any {
     const proccessedInputJson = StateProcessor.processInputPath(json, stateDefinition.InputPath);
-    // TODO: Parameters Task
 
-    return JSON.parse(proccessedInputJson);
+    let output = '{}';
+
+    if (stateDefinition.Resource.endsWith('.waitForTaskToken')) {
+      output = StateProcessor.processWaitForTokenParameters(proccessedInputJson, stateDefinition.Parameters);
+    } else {
+      // TODO: Process non WaitForToken Parameters
+      // output = StateProcessor.processParameters(proccessedInputJson, stateDefinition.Parameters);
+    }
+
+    return JSON.parse(output);
   }
 
   private processOutput(output: any, stateDefinition: TaskStateDefinition): string {
