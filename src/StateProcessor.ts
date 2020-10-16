@@ -1,4 +1,5 @@
 import { JSONPath } from 'jsonpath-plus';
+import { PayloadTemplate } from '../src/types/State';
 
 export class StateProcessor {
   public static processInputPath(dataJson: string | undefined | null, inputPath: string | null | undefined): string {
@@ -20,7 +21,7 @@ export class StateProcessor {
     return JSON.stringify(result[0]);
   }
 
-  private static validateWaitForTokenParameters(parameters: Record<string, unknown>) {
+  private static validateWaitForTokenParameters(parameters: PayloadTemplate) {
     const acceptableParameterProperties = ['FunctionName', 'Payload'];
 
     if (!parameters.FunctionName) {
@@ -38,19 +39,26 @@ export class StateProcessor {
     return path.startsWith('$$.');
   }
 
-  private static isPathKey(path: any) {
-    return typeof path === 'string' && path.endsWith('.$');
+  private static isPathKey(path: string) {
+    return path.endsWith('.$');
   }
 
-  public static processWaitForTokenParameters(dataJson: string | undefined | null, parameters: any): string {
+  public static processWaitForTokenParameters(
+    dataJson: string | undefined | null,
+    parameters: PayloadTemplate,
+  ): string {
     const inputJson = dataJson || '{}';
 
     this.validateWaitForTokenParameters(parameters);
 
+    if (typeof parameters.Payload !== 'object') {
+      return '{}';
+    }
+
     const output = {};
 
     // TODO: To extract to a recursive function so that every method can use it
-    Object.entries(parameters.Payload).forEach(([key, value]: [string, any]) => {
+    Object.entries(parameters.Payload).forEach(([key, value]: [string, unknown]) => {
       if (this.isPathKey(key)) {
         if (typeof value !== 'string') {
           throw new Error(

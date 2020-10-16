@@ -106,10 +106,10 @@ export type TaskCatchRule = {
 
 type TaskStateParameters = {
   FunctionName?: string | { 'Fn::GetAtt': [string, string] };
-  Payload?: any;
+  Payload?: Record<string, unknown>;
 };
 
-type PayloadTemplate = TaskStateParameters & Record<string, unknown>;
+export type PayloadTemplate = TaskStateParameters & Record<string, unknown>;
 
 export type TaskStateDefinition = CommonStateDefinition & {
   Resource: string;
