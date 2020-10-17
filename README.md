@@ -1,5 +1,6 @@
 # Serverless Offline Step Functions **(STATUS: ALPHA)**
 
+[![serverless](http://public.serverless.com/badges/v3.svg)](http://www.serverless.com)
 ![GitHub](https://img.shields.io/github/license/jefer590/serverless-offline-step-functions)
 ![GitHub pull requests](https://img.shields.io/github/issues-pr/jefer590/serverless-offline-step-functions)
 ![GitHub issues](https://img.shields.io/github/issues-raw/jefer590/serverless-offline-step-functions)
