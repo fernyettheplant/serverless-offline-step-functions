@@ -26,6 +26,7 @@ export class StateProcessor {
   public static processWaitForTokenParameters(
     dataJson: string | undefined | null,
     parameters: PayloadTemplateType,
+    taskToken: string,
   ): string {
     const inputJson = dataJson || '{}';
 

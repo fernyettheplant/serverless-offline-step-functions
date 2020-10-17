@@ -6,6 +6,10 @@ import type { StateMachines } from './types/StateMachine';
 import type { StateDefinition } from './types/State';
 import { StateMachineExecutor } from './StateMachineExecutor';
 import { Logger } from './utils/Logger';
+import { StateMachineContext } from './Context/StateMachineContext';
+import { ExecutionContext } from './Context/ExecutionContext';
+import { Context } from './Context/Context';
+import { StateContext } from './Context/StateContext';
 
 export type StepFunctionSimulatorServerOptions = {
   port: number;
@@ -66,16 +70,19 @@ export class StepFunctionSimulatorServer {
     this.logger.log(`Got request for ${req.method} ${req.url}`);
 
     const executionInput: StepFunctions.Types.StartExecutionInput = req.body;
-    const stateMachineName: string = executionInput.stateMachineArn.split(':').slice(-1)[0];
-    const stateMachineToExecute = this.options.stateMachines[stateMachineName];
+    const stateMachineContext = StateMachineContext.create(executionInput.stateMachineArn);
+    const stateMachineToExecute = this.options.stateMachines[stateMachineContext.name];
 
     if (!stateMachineToExecute) {
       return res.status(500);
     }
 
-    const startAtState: StateDefinition =
-      stateMachineToExecute.definition.States[stateMachineToExecute.definition.StartAt];
-    const sme = new StateMachineExecutor(stateMachineToExecute);
+    const executionContext = ExecutionContext.create(stateMachineContext, executionInput.input);
+    const firstStateContext = StateContext.create(stateMachineToExecute.definition.StartAt);
+    const context = Context.create(executionContext, stateMachineContext, firstStateContext);
+
+    const startAtState: StateDefinition = stateMachineToExecute.definition.States[firstStateContext.Name];
+    const sme = new StateMachineExecutor(stateMachineToExecute, context);
 
     await new Promise((resolve) => {
       // per docs, step execution response includes the start date and execution arn
@@ -87,6 +94,11 @@ export class StepFunctionSimulatorServer {
       resolve(res.status(200).json(output));
     });
 
-    await sme.execute(startAtState, executionInput.input);
+    await sme.execute(startAtState, executionContext.input);
+    // if (typeof executionResult === 'function') {
+    //   // Execution is not complete, we need to persist this to be able to resume
+    // } else {
+    //   // Nothing to do, execution is complete
+    // }
   }
 }

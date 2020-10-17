@@ -3,10 +3,11 @@ import { StateExecutorOutput } from '../../types/StateExecutorOutput';
 import { Logger } from '../../utils/Logger';
 import { StateTypeExecutor } from '../StateTypeExecutor';
 
-export class SucceedExecutor implements StateTypeExecutor {
+export class SucceedExecutor extends StateTypeExecutor {
   private readonly logger: Logger;
 
   constructor() {
+    super();
     this.logger = Logger.getInstance();
   }
 

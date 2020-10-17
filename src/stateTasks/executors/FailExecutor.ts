@@ -4,10 +4,11 @@ import { Logger } from '../../utils/Logger';
 import { FailExecutorException } from '../exceptions/FailExecutorException';
 import { StateTypeExecutor } from '../StateTypeExecutor';
 
-export class FailExecutor implements StateTypeExecutor {
+export class FailExecutor extends StateTypeExecutor {
   private readonly logger: Logger;
 
   constructor() {
+    super();
     this.logger = Logger.getInstance();
   }
 

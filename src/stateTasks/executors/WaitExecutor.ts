@@ -8,10 +8,11 @@ import { Logger } from '../../utils/Logger';
 import { validateTimestamp } from '../../utils/validateTimestamp';
 import { StateTypeExecutor } from '../StateTypeExecutor';
 
-export class WaitExecutor implements StateTypeExecutor {
+export class WaitExecutor extends StateTypeExecutor {
   private readonly logger: Logger;
 
   constructor() {
+    super();
     this.logger = Logger.getInstance();
   }
 

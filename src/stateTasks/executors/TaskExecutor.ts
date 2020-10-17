@@ -1,14 +1,15 @@
 import { promises as fs, constants as FsConstants } from 'fs';
 import path from 'path';
+import { v4 as uuid } from 'uuid';
 
-import type { StateTypeExecutor } from '../StateTypeExecutor';
+import { StateTypeExecutor } from '../StateTypeExecutor';
 import type { StateExecutorOutput } from '../../types/StateExecutorOutput';
 import type { TaskStateDefinition } from '../../types/State';
 
 import { StateInfoHandler } from '../../StateInfoHandler';
 import { StateProcessor } from '../../StateProcessor';
 
-export class TaskExecutor implements StateTypeExecutor {
+export class TaskExecutor extends StateTypeExecutor {
   public async execute(
     stateMachineName: string,
     stateName: string,
@@ -23,7 +24,8 @@ export class TaskExecutor implements StateTypeExecutor {
     }
 
     // TODO: Handle Lambda Context and Callback
-    const input = this.processInput(inputJson, stateDefinition);
+    const taskToken = uuid();
+    const input = this.processInput(inputJson, stateDefinition, taskToken);
     const context = {};
     const lambdaPath = await this.getWebpackOrCommonFuction(stateInfo.handlerPath);
     const functionLambda = await import(`${lambdaPath}`);
@@ -41,13 +43,20 @@ export class TaskExecutor implements StateTypeExecutor {
     };
   }
 
-  private processInput(json: string | undefined, stateDefinition: TaskStateDefinition): any {
+  public isWaitForTaskToken(resource?: string): boolean {
+    if (resource && resource.endsWith('.waitForTaskToken')) {
+      return true;
+    }
+    return false;
+  }
+
+  private processInput(json: string | undefined, stateDefinition: TaskStateDefinition, taskToken: string): any {
     const proccessedInputJson = StateProcessor.processInputPath(json, stateDefinition.InputPath);
 
     let output = proccessedInputJson;
 
     if (stateDefinition.Parameters && stateDefinition.Resource.endsWith('.waitForTaskToken')) {
-      output = StateProcessor.processWaitForTokenParameters(proccessedInputJson, stateDefinition.Parameters);
+      output = StateProcessor.processWaitForTokenParameters(proccessedInputJson, stateDefinition.Parameters, taskToken);
     } else {
       output = StateProcessor.processParameters(proccessedInputJson, stateDefinition.Parameters);
     }

@@ -4,10 +4,11 @@ import { StateProcessor } from '../../StateProcessor';
 import { StateTypeExecutor } from '../StateTypeExecutor';
 import { Logger } from '../../utils/Logger';
 
-export class PassExecutor implements StateTypeExecutor {
+export class PassExecutor extends StateTypeExecutor {
   private readonly logger: Logger;
 
   constructor() {
+    super();
     this.logger = Logger.getInstance();
   }
 

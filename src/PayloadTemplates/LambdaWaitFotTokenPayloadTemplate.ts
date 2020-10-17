@@ -43,7 +43,7 @@ export class LambdaWaitFotTokenPayloadTemplate extends WaitFotTokenPayloadTempla
     }
   }
 
-  process(inputJson: string): Record<string, unknown> {
+  process(inputJson: string, contextJson: string = ''): Record<string, unknown> {
     return this.processPayloadTemplate(inputJson, this._payload.Payload);
   }
 }
