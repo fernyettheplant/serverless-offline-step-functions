@@ -9,6 +9,7 @@ export abstract class StateTypeExecutor {
     inputJson: string | undefined,
   ): Promise<StateExecutorOutput>;
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   public isWaitForTaskToken(resource?: string): boolean {
     return false;
   }

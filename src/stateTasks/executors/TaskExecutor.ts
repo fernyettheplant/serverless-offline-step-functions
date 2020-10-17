@@ -1,6 +1,5 @@
 import { promises as fs, constants as FsConstants } from 'fs';
 import path from 'path';
-import { v4 as uuid } from 'uuid';
 
 import { StateTypeExecutor } from '../StateTypeExecutor';
 import type { StateExecutorOutput } from '../../types/StateExecutorOutput';
