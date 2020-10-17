@@ -91,7 +91,7 @@ export class StepFunctionSimulatorServer {
       }
 
       if (this.isSendTaskFailure(req.body)) {
-        // TODO
+        // TODO: Send Task Failure. Need to implement `Catch` before
       }
     }
 

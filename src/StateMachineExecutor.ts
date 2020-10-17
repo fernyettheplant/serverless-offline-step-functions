@@ -21,7 +21,6 @@ export class StateMachineExecutor {
     this.logger = Logger.getInstance();
   }
 
-  // TODO: Include Context in the JSON Input
   public async execute(
     stateDefinition: StateDefinition,
     inputJson: string | undefined,

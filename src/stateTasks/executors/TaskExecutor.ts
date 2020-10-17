@@ -23,7 +23,6 @@ export class TaskExecutor extends StateTypeExecutor {
       throw new Error('Handler does not exists');
     }
 
-    // TODO: Handle Lambda Context and Callback
     const input = this.processInput(inputJson, stateDefinition, context);
     const lambdaPath = await this.getWebpackOrCommonFuction(stateInfo.handlerPath);
     const functionLambda = await import(`${lambdaPath}`);
