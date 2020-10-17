@@ -1,4 +1,4 @@
-import { JSONPath, JSONPathClass } from 'jsonpath-plus';
+import { JSONPath } from 'jsonpath-plus';
 import { PayloadTemplateType } from '../src/types/State';
 import { LambdaWaitFotTokenPayloadTemplate } from './PayloadTemplates/LambdaWaitFotTokenPayloadTemplate';
 import { ParameterPayloadTemplate } from './PayloadTemplates/ParameterPayloadTemplate';
