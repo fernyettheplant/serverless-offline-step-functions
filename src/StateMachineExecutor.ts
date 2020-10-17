@@ -61,7 +61,7 @@ export class StateMachineExecutor {
       // TODO: Transition
 
       const nextState = StateContext.create(stateExecutorOutput.Next);
-      this.context.transitionToState(nextState);
+      this.context.transitionTo(nextState);
 
       // this.context.State.Name = stateExecutorOutput.Next;
       this.logger.log(`Output: \n${JSON.stringify(JSON.parse(stateExecutorOutput.json), null, 2)}\n`);

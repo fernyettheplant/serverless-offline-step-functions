@@ -36,7 +36,7 @@ export class Context {
     return this._taskContext;
   }
 
-  transitionToState(state: StateContext, task: TaskContext = TaskContext.create()): void {
+  transitionTo(state: StateContext, task: TaskContext = TaskContext.create()): void {
     this._stateContext = state;
     this._taskContext = task;
   }
