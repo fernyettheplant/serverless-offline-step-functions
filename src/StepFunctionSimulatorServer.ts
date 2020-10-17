@@ -67,8 +67,33 @@ export class StepFunctionSimulatorServer {
     this.express.use(this.resolveStateMachine.bind(this));
   }
 
+  private isSendTaskSuccess(body: Record<string, unknown>): boolean {
+    return !!body.taskToken && !!body.output;
+  }
+
+  private isSendTaskFailure(body: Record<string, unknown>): boolean {
+    return !!body.taskToken && !body.output;
+  }
+
   private async resolveStateMachine(req: Request, res: Response) {
     this.logger.log(`Got request for ${req.method} ${req.url}`);
+    if (req.body.taskToken) {
+      // Resume step function
+
+      if (this.isSendTaskSuccess(req.body)) {
+        this.logger.log(`Got request for ${JSON.stringify(req.body)}`);
+        if (typeof this.pendingStateMachineExecutions[req.body.taskToken] !== 'function') {
+          return res.status(404).json({ message: `No step function to resume with taskToken '${req.body.taskToken}'` });
+        }
+
+        this.pendingStateMachineExecutions[req.body.taskToken]();
+        return;
+      }
+
+      if (this.isSendTaskFailure(req.body)) {
+        // TODO
+      }
+    }
 
     const executionInput: StepFunctions.Types.StartExecutionInput = req.body;
     const stateMachineContext = StateMachineContext.create(executionInput.stateMachineArn);
@@ -88,8 +113,8 @@ export class StepFunctionSimulatorServer {
     await new Promise((resolve) => {
       // per docs, step execution response includes the start date and execution arn
       const output: StepFunctions.Types.StartExecutionOutput = {
-        startDate: sme.startDate,
-        executionArn: sme.executionArn,
+        startDate: new Date(context.Execution.StartTime),
+        executionArn: context.Execution.Id,
       };
 
       resolve(res.status(200).json(output));
@@ -99,13 +124,6 @@ export class StepFunctionSimulatorServer {
     if (typeof executionResult === 'function') {
       // Execution is not complete, we need to persist this to be able to resume
       this.pendingStateMachineExecutions[context.Task.Token] = executionResult;
-      console.log('WAITTTTTTTTIIIING');
-      setTimeout(() => {
-        console.log('RESTARTING STEP FUNC.......');
-        this.pendingStateMachineExecutions[context.Task.Token]();
-      }, 10000);
-    } else {
-      // Nothing to do, execution is complete
     }
   }
 }

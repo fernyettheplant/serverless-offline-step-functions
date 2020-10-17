@@ -6,22 +6,19 @@ import { StateExecutorOutput } from './types/StateExecutorOutput';
 import { Logger } from './utils/Logger';
 import { Context } from './Context/Context';
 import { StateContext } from './Context/StateContext';
+import { ContextToJson } from './Context/ContextToJson';
 
 export type ExecuteType = () => Promise<ExecuteType | string | void>;
 
 export class StateMachineExecutor {
   private readonly context: Context;
   private readonly stateMachine: StateMachine;
-  private readonly _startDate: Date;
-  private readonly _executionArn: string;
   private readonly logger: Logger;
 
   constructor(stateMachine: StateMachine, context: Context) {
     this.context = context;
     this.stateMachine = stateMachine;
     this.logger = Logger.getInstance();
-    this._startDate = new Date();
-    this._executionArn = `${this.stateMachine.name}-${this.stateMachine.definition.StartAt}-${this._startDate}`;
   }
 
   // TODO: Include Context in the JSON Input
@@ -31,6 +28,7 @@ export class StateMachineExecutor {
   ): Promise<ExecuteType | string | void> {
     this.logger.log(`* * * * * ${this.context.State.Name} * * * * *`);
     this.logger.log(`input: \n${inputJson ? JSON.stringify(JSON.parse(inputJson), null, 2) : 'undefined'}\n`);
+    this.logger.log(`context: \n${JSON.stringify(ContextToJson(this.context), null, 2)}\n`);
 
     const typeExecutor = StateTypeExecutorFactory.getExecutor(stateDefinition.Type);
 
@@ -51,29 +49,24 @@ export class StateMachineExecutor {
       }
 
       const nextState = StateContext.create(stateExecutorOutput.Next);
-      this.context.transitionTo(nextState);
+
+      const executeNextState = () => {
+        this.context.transitionTo(nextState);
+        return this.execute(this.stateMachine.definition.States[nextState.Name], stateExecutorOutput.json);
+      };
 
       this.logger.log(`Output: \n${JSON.stringify(JSON.parse(stateExecutorOutput.json), null, 2)}\n`);
       if (typeExecutor.isWaitForTaskToken((stateDefinition as TaskStateDefinition).Resource)) {
-        return this.execute.bind(
-          this,
-          this.stateMachine.definition.States[stateExecutorOutput.Next],
-          stateExecutorOutput.json,
+        this.logger.log(
+          `Step function execution paused. \n Waiting for success or failure with task token "${this.context.Task.Token}"\n`,
         );
+        return executeNextState;
       } else {
-        this.execute(this.stateMachine.definition.States[nextState.Name], stateExecutorOutput.json);
+        executeNextState();
       }
     } catch (error) {
       // TODO: Error Handling for State Errors including FailState. Must be done
       this.logger.error(error.stack);
     }
-  }
-
-  get startDate(): Date {
-    return this._startDate;
-  }
-
-  get executionArn(): string {
-    return this._executionArn;
   }
 }

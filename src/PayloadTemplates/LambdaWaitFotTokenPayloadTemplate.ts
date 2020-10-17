@@ -32,6 +32,7 @@ export class LambdaWaitFotTokenPayloadTemplate extends WaitFotTokenPayloadTempla
       );
     }
 
+    // Strip the `.$` at the end
     const newKey = key.substring(0, key.length - 2);
 
     if (this.isContextObjectPath(value)) {
