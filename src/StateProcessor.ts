@@ -35,29 +35,47 @@ export class StateProcessor {
     return JSON.stringify(payloadTemplate.process(inputJson));
   }
 
-  public static processParameters(dataJson: string | undefined | null, parameters?: PayloadTemplateType): string {
-    if (!parameters) {
-      return '{}';
+  public static processParameters(
+    dataJson: string | undefined | null,
+    payloadTemplateInput?: PayloadTemplateType,
+  ): string {
+    if (!payloadTemplateInput) {
+      return dataJson || '{}';
     }
 
     const inputJson = dataJson || '{}';
 
-    const payloadTemplate = ParameterPayloadTemplate.create(parameters);
+    const payloadTemplate = ParameterPayloadTemplate.create(payloadTemplateInput);
 
     return JSON.stringify(payloadTemplate.process(inputJson));
   }
 
-  public static processResultPath(json: string, resultPath?: string): string {
-    const result = JSONPath({
-      path: resultPath || '$',
-      json: JSON.parse(json),
-    });
-
-    if (!result || result.length === 0) {
-      throw new Error('');
+  public static processResultPath(
+    input: Record<string, unknown>,
+    result: Record<string, unknown>,
+    resultPath?: string,
+  ): string {
+    if (!resultPath || resultPath === '$') {
+      return JSON.stringify(result);
     }
 
-    return JSON.stringify(result[0]);
+    const resultPathArray = (JSONPath as any).toPathArray(resultPath);
+
+    let temp: any = input;
+    for (let i = 1; i < resultPathArray.length; i++) {
+      const key = resultPathArray[i];
+      if (i === resultPathArray.length - 1) {
+        temp[key] = result;
+      } else {
+        if (!temp[key]) {
+          temp[key] = {};
+        }
+
+        temp = temp[key];
+      }
+    }
+
+    return JSON.stringify(input);
   }
 
   public static processOutputPath(json: string, outputPath?: string): string {
