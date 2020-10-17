@@ -15,9 +15,7 @@ export class LambdaWaitFotTokenPayloadTemplate extends WaitFotTokenPayloadTempla
 
     Object.keys(payload).forEach((key) => {
       if (!this.acceptableParameterProperties.includes(key)) {
-        throw new Error(
-          `The field "${key}" is not supported by Step Functions`,
-        );
+        throw new Error(`The field "${key}" is not supported by Step Functions`);
       }
     });
 
@@ -45,31 +43,21 @@ export class LambdaWaitFotTokenPayloadTemplate extends WaitFotTokenPayloadTempla
     }
   }
 
-  private processPayloadTemplateEntry(
-    key: string,
-    value: unknown,
-    inputJson: string,
-  ): Record<string, unknown> {
+  private processPayloadTemplateEntry(key: string, value: unknown, inputJson: string): Record<string, unknown> {
     if (this.isPathKey(key)) {
       return this.processPathKey(key, value, inputJson);
     }
 
     if (typeof value === 'object' && value !== null) {
       return {
-        [key]: this.processPayloadTemplate(
-          inputJson,
-          value as Record<string, unknown>,
-        ),
+        [key]: this.processPayloadTemplate(inputJson, value as Record<string, unknown>),
       };
     }
 
     return { [key]: value };
   }
 
-  private processPayloadTemplate(
-    inputJson: string,
-    payload?: Record<string, unknown>,
-  ): any {
+  private processPayloadTemplate(inputJson: string, payload?: Record<string, unknown>): any {
     if (!payload) {
       return {};
     }

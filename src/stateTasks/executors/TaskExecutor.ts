@@ -16,10 +16,7 @@ export class TaskExecutor implements StateTypeExecutor {
     inputJson: string | undefined,
   ): Promise<StateExecutorOutput> {
     const statesInfoHandler = StateInfoHandler.getInstance();
-    const stateInfo = statesInfoHandler.getStateInfo(
-      stateMachineName,
-      stateName,
-    );
+    const stateInfo = statesInfoHandler.getStateInfo(stateMachineName, stateName);
 
     if (!stateInfo) {
       throw new Error('Handler does not exists');
@@ -28,9 +25,7 @@ export class TaskExecutor implements StateTypeExecutor {
     // TODO: Handle Lambda Context and Callback
     const input = this.processInput(inputJson, stateDefinition);
     const context = {};
-    const lambdaPath = await this.getWebpackOrCommonFuction(
-      stateInfo.handlerPath,
-    );
+    const lambdaPath = await this.getWebpackOrCommonFuction(stateInfo.handlerPath);
     const functionLambda = await import(`${lambdaPath}`);
 
     this.injectEnvVarsLambdaSpecific(stateInfo.environment);
@@ -46,25 +41,13 @@ export class TaskExecutor implements StateTypeExecutor {
     };
   }
 
-  private processInput(
-    json: string | undefined,
-    stateDefinition: TaskStateDefinition,
-  ): any {
-    const proccessedInputJson = StateProcessor.processInputPath(
-      json,
-      stateDefinition.InputPath,
-    );
+  private processInput(json: string | undefined, stateDefinition: TaskStateDefinition): any {
+    const proccessedInputJson = StateProcessor.processInputPath(json, stateDefinition.InputPath);
 
     let output = proccessedInputJson;
 
-    if (
-      stateDefinition.Parameters &&
-      stateDefinition.Resource.endsWith('.waitForTaskToken')
-    ) {
-      output = StateProcessor.processWaitForTokenParameters(
-        proccessedInputJson,
-        stateDefinition.Parameters,
-      );
+    if (stateDefinition.Parameters && stateDefinition.Resource.endsWith('.waitForTaskToken')) {
+      output = StateProcessor.processWaitForTokenParameters(proccessedInputJson, stateDefinition.Parameters);
     } else {
       // TODO: Process non WaitForToken Parameters
       // output = StateProcessor.processParameters(proccessedInputJson, stateDefinition.Parameters);
@@ -73,32 +56,18 @@ export class TaskExecutor implements StateTypeExecutor {
     return JSON.parse(output);
   }
 
-  private processOutput(
-    output: any,
-    stateDefinition: TaskStateDefinition,
-  ): string {
+  private processOutput(output: any, stateDefinition: TaskStateDefinition): string {
     let outputJson = output ? JSON.stringify(output) : '{}';
 
     // TODO: Do Result Selector
-    outputJson = StateProcessor.processResultPath(
-      outputJson,
-      stateDefinition.ResultPath,
-    );
-    outputJson = StateProcessor.processOutputPath(
-      outputJson,
-      stateDefinition.OutputPath,
-    );
+    outputJson = StateProcessor.processResultPath(outputJson, stateDefinition.ResultPath);
+    outputJson = StateProcessor.processOutputPath(outputJson, stateDefinition.OutputPath);
 
     return outputJson;
   }
 
-  private async getWebpackOrCommonFuction(
-    lambdaFilePath: string,
-  ): Promise<string> {
-    const webpackPath = path.resolve(
-      process.cwd(),
-      `./.webpack/service/${lambdaFilePath}.js`,
-    );
+  private async getWebpackOrCommonFuction(lambdaFilePath: string): Promise<string> {
+    const webpackPath = path.resolve(process.cwd(), `./.webpack/service/${lambdaFilePath}.js`);
     let filePathResolved: string;
 
     try {
@@ -111,9 +80,7 @@ export class TaskExecutor implements StateTypeExecutor {
     return filePathResolved;
   }
 
-  private injectEnvVarsLambdaSpecific(
-    lambdaEnv: Record<string, string> | undefined,
-  ): void {
+  private injectEnvVarsLambdaSpecific(lambdaEnv: Record<string, string> | undefined): void {
     if (!lambdaEnv) {
       return;
     }
@@ -123,9 +90,7 @@ export class TaskExecutor implements StateTypeExecutor {
     });
   }
 
-  private removeEnvVarsLambdaSpecific(
-    lambdaEnv: Record<string, string> | undefined,
-  ): void {
+  private removeEnvVarsLambdaSpecific(lambdaEnv: Record<string, string> | undefined): void {
     if (!lambdaEnv) {
       return;
     }
