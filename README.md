@@ -1,9 +1,11 @@
 # Serverless Offline Step Functions **(STATUS: ALPHA)**
 
 [![serverless](http://public.serverless.com/badges/v3.svg)](http://www.serverless.com)
+![npm](https://img.shields.io/npm/v/@fernthedev/serverless-offline-step-functions)
+![node-lts](https://img.shields.io/node/v-lts/@fernthedev/serverless-offline-step-functions)
 ![GitHub](https://img.shields.io/github/license/jefer590/serverless-offline-step-functions)
-![GitHub pull requests](https://img.shields.io/github/issues-pr/jefer590/serverless-offline-step-functions)
 ![GitHub issues](https://img.shields.io/github/issues-raw/jefer590/serverless-offline-step-functions)
+![GitHub pull requests](https://img.shields.io/github/issues-pr/jefer590/serverless-offline-step-functions)
 
 Serverless Offline Plugin to Support Step Functions for Local Development.
 
@@ -14,13 +16,15 @@ Serverless Offline Plugin to Support Step Functions for Local Development.
 
 ## Sponsor
 
-If the plugin is being useful in your company and want to keep the development active, consider buying me a coffee 🙂... coffee is the thing that makes me the most happy person in the world and I'd appreciate the sponsorship.
+If the plugin is being useful in your company and/or project and want to keep the development active, consider buying me a coffee 🙂... coffee is the thing that makes me the most happy person in the world and I'd appreciate the sponsorship.
 
 [![ko-fi](https://www.ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/Y8Y42C4E9)
 
 ## Requirements
 
-- [serverless-step-functions plugin](https://github.com/serverless-operations/)
+- [serverless-offline](https://github.com/dherault/serverless-offline)
+- [serverless-step-functions plugin](https://github.com/serverless-operations/serverless-step-functions)
+- [serverless-webpack (optional)](https://github.com/serverless-heaven/serverless-webpack)
 
 ## Installation
 
@@ -71,6 +75,7 @@ plugins:
 | ***Pass*** | ✅ |
 | ***Fail***| ✅ |
 | ***Succeed***|✅|
+| ***Map*** | Not Supported at all yet. |
 
 ## Credits and inspiration
 
