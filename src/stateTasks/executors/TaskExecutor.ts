@@ -32,7 +32,7 @@ export class TaskExecutor implements StateTypeExecutor {
     const output = await functionLambda[stateInfo.handlerName](input, context);
     this.removeEnvVarsLambdaSpecific(stateInfo.environment);
 
-    const outputJson = this.processOutput(output, stateDefinition);
+    const outputJson = this.processOutput(input, output, stateDefinition);
 
     return {
       Next: stateDefinition.Next,
@@ -55,11 +55,15 @@ export class TaskExecutor implements StateTypeExecutor {
     return JSON.parse(output);
   }
 
-  private processOutput(output: any, stateDefinition: TaskStateDefinition): string {
+  private processOutput(
+    input: Record<string, unknown>,
+    output: Record<string, unknown>,
+    stateDefinition: TaskStateDefinition,
+  ): string {
     let outputJson = output ? JSON.stringify(output) : '{}';
 
     // TODO: Do Result Selector
-    outputJson = StateProcessor.processResultPath(outputJson, stateDefinition.ResultPath);
+    outputJson = StateProcessor.processResultPath(input, output, stateDefinition.ResultPath);
     outputJson = StateProcessor.processOutputPath(outputJson, stateDefinition.OutputPath);
 
     return outputJson;

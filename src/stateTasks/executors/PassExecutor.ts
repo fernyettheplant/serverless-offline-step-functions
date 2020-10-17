@@ -23,7 +23,7 @@ export class PassExecutor implements StateTypeExecutor {
     return Promise.resolve({
       Next: definition.Next,
       End: definition.End,
-      json: this.processOutput(input, definition),
+      json: this.processOutput(input, input, definition),
     });
   }
 
@@ -34,11 +34,11 @@ export class PassExecutor implements StateTypeExecutor {
     return proccessedInputJson;
   }
 
-  private processOutput(output: string, stateDefinition: PassStateDefinition): string {
+  private processOutput(input: string, output: string, stateDefinition: PassStateDefinition): string {
     let outputJson = output || '{}';
 
     // TODO: Do Result Selector
-    outputJson = StateProcessor.processResultPath(outputJson, stateDefinition.ResultPath);
+    outputJson = StateProcessor.processResultPath(JSON.parse(input), JSON.parse(output), stateDefinition.ResultPath);
     outputJson = StateProcessor.processOutputPath(outputJson, stateDefinition.OutputPath);
 
     return outputJson;
