@@ -1,5 +1,5 @@
 export abstract class PayloadTemplate {
-  public abstract process(inputJson: string): Record<string, unknown>;
+  public abstract process(inputJson: string, contextJson: string): Record<string, unknown>;
   protected abstract processPathKey(key: string, value: unknown, inputJson: string): Record<string, unknown>;
 
   protected isPathKey(path: string): boolean {

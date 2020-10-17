@@ -4,8 +4,12 @@ import type { StepFunctions } from 'aws-sdk';
 
 import type { StateMachines } from './types/StateMachine';
 import type { StateDefinition } from './types/State';
-import { StateMachineExecutor } from './StateMachineExecutor';
+import { ExecuteType, StateMachineExecutor } from './StateMachineExecutor';
 import { Logger } from './utils/Logger';
+import { StateMachineContext } from './Context/StateMachineContext';
+import { ExecutionContext } from './Context/ExecutionContext';
+import { Context } from './Context/Context';
+import { StateContext } from './Context/StateContext';
 
 export type StepFunctionSimulatorServerOptions = {
   port: number;
@@ -18,6 +22,7 @@ export class StepFunctionSimulatorServer {
   // TODO: Move State Machines and type it
   private options: StepFunctionSimulatorServerOptions;
   private readonly logger: Logger;
+  private pendingStateMachineExecutions: { [key: string]: ExecuteType } = {};
 
   constructor(options: StepFunctionSimulatorServerOptions) {
     this.options = options;
@@ -62,31 +67,63 @@ export class StepFunctionSimulatorServer {
     this.express.use(this.resolveStateMachine.bind(this));
   }
 
+  private isSendTaskSuccess(body: Record<string, unknown>): boolean {
+    return !!body.taskToken && !!body.output;
+  }
+
+  private isSendTaskFailure(body: Record<string, unknown>): boolean {
+    return !!body.taskToken && !body.output;
+  }
+
   private async resolveStateMachine(req: Request, res: Response) {
     this.logger.log(`Got request for ${req.method} ${req.url}`);
+    if (req.body.taskToken) {
+      // Resume step function
+
+      if (this.isSendTaskSuccess(req.body)) {
+        this.logger.log(`Got request for ${JSON.stringify(req.body)}`);
+        if (typeof this.pendingStateMachineExecutions[req.body.taskToken] !== 'function') {
+          return res.status(404).json({ message: `No step function to resume with taskToken '${req.body.taskToken}'` });
+        }
+
+        this.pendingStateMachineExecutions[req.body.taskToken]();
+        return;
+      }
+
+      if (this.isSendTaskFailure(req.body)) {
+        // TODO: Send Task Failure. Need to implement `Catch` before
+      }
+    }
 
     const executionInput: StepFunctions.Types.StartExecutionInput = req.body;
-    const stateMachineName: string = executionInput.stateMachineArn.split(':').slice(-1)[0];
-    const stateMachineToExecute = this.options.stateMachines[stateMachineName];
+    const stateMachineContext = StateMachineContext.create(executionInput.stateMachineArn);
+    const stateMachineToExecute = this.options.stateMachines[stateMachineContext.Name];
 
     if (!stateMachineToExecute) {
       return res.status(500);
     }
 
-    const startAtState: StateDefinition =
-      stateMachineToExecute.definition.States[stateMachineToExecute.definition.StartAt];
-    const sme = new StateMachineExecutor(stateMachineToExecute);
+    const executionContext = ExecutionContext.create(stateMachineContext, executionInput.input);
+    const firstStateContext = StateContext.create(stateMachineToExecute.definition.StartAt);
+    const context = Context.create(executionContext, stateMachineContext, firstStateContext);
+
+    const startAtState: StateDefinition = stateMachineToExecute.definition.States[firstStateContext.Name];
+    const sme = new StateMachineExecutor(stateMachineToExecute, context);
 
     await new Promise((resolve) => {
       // per docs, step execution response includes the start date and execution arn
       const output: StepFunctions.Types.StartExecutionOutput = {
-        startDate: sme.startDate,
-        executionArn: sme.executionArn,
+        startDate: new Date(context.Execution.StartTime),
+        executionArn: context.Execution.Id,
       };
 
       resolve(res.status(200).json(output));
     });
 
-    await sme.execute(startAtState, executionInput.input);
+    const executionResult = await sme.execute(startAtState, executionContext.Input);
+    if (typeof executionResult === 'function') {
+      // Execution is not complete, we need to persist this to be able to resume
+      this.pendingStateMachineExecutions[context.Task.Token] = executionResult;
+    }
   }
 }

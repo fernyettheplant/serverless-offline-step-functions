@@ -1,14 +1,17 @@
 import { JSONPath } from 'jsonpath-plus';
+import { Context } from '../Context/Context';
+import { ContextToJson } from '../Context/ContextToJson';
 import { PayloadTemplateType } from '../types/State';
 import { WaitFotTokenPayloadTemplate } from './WaitForTokenPayloadTemplate';
 
 export class LambdaWaitFotTokenPayloadTemplate extends WaitFotTokenPayloadTemplate {
   private static acceptableParameterProperties = ['FunctionName', 'Payload'];
-  constructor(private readonly _payload: PayloadTemplateType) {
+  constructor(private readonly _payload: PayloadTemplateType, private readonly context: Context) {
     super();
   }
 
-  static create(payload: PayloadTemplateType): LambdaWaitFotTokenPayloadTemplate {
+  static create(payload: PayloadTemplateType, context: Context): LambdaWaitFotTokenPayloadTemplate {
+    // TODO: Move this validation to the abstract class and let children define acceptableParameterProperties
     if (!payload.FunctionName) {
       throw new Error(`The field 'FunctionName' is required but was missing`);
     }
@@ -19,7 +22,7 @@ export class LambdaWaitFotTokenPayloadTemplate extends WaitFotTokenPayloadTempla
       }
     });
 
-    return new LambdaWaitFotTokenPayloadTemplate(payload);
+    return new LambdaWaitFotTokenPayloadTemplate(payload, context);
   }
 
   protected processPathKey(key: string, value: unknown, inputJson: string): Record<string, unknown> {
@@ -29,10 +32,16 @@ export class LambdaWaitFotTokenPayloadTemplate extends WaitFotTokenPayloadTempla
       );
     }
 
+    // Strip the `.$` at the end
     const newKey = key.substring(0, key.length - 2);
 
     if (this.isContextObjectPath(value)) {
-      return { [newKey]: value.substring(3) };
+      const result = JSONPath({
+        path: value.substring(1),
+        json: ContextToJson(this.context),
+      });
+
+      return { [newKey]: result[0] };
     } else {
       const result = JSONPath({
         path: value === undefined ? '$' : value,

@@ -1,5 +1,6 @@
 import delay from 'delay';
 import { JSONPath } from 'jsonpath-plus';
+import { Context } from '../../Context/Context';
 import { StateProcessor } from '../../StateProcessor';
 
 import type { WaitStateDefinition } from '../../types/State';
@@ -8,16 +9,16 @@ import { Logger } from '../../utils/Logger';
 import { validateTimestamp } from '../../utils/validateTimestamp';
 import { StateTypeExecutor } from '../StateTypeExecutor';
 
-export class WaitExecutor implements StateTypeExecutor {
+export class WaitExecutor extends StateTypeExecutor {
   private readonly logger: Logger;
 
   constructor() {
+    super();
     this.logger = Logger.getInstance();
   }
 
   public async execute(
-    _stateMachineName: string,
-    _stateName: string,
+    context: Context,
     definition: WaitStateDefinition,
     inputJson: string | undefined,
   ): Promise<StateExecutorOutput> {

@@ -3,21 +3,22 @@ import type { PassStateDefinition } from '../../types/State';
 import { StateProcessor } from '../../StateProcessor';
 import { StateTypeExecutor } from '../StateTypeExecutor';
 import { Logger } from '../../utils/Logger';
+import { Context } from '../../Context/Context';
 
-export class PassExecutor implements StateTypeExecutor {
+export class PassExecutor extends StateTypeExecutor {
   private readonly logger: Logger;
 
   constructor() {
+    super();
     this.logger = Logger.getInstance();
   }
 
   public execute(
-    _stateMachineName: string,
-    stateName: string,
+    context: Context,
     definition: PassStateDefinition,
     json: string | undefined,
   ): Promise<StateExecutorOutput> {
-    this.logger.log(`* * * Passed Task ${stateName} * * *`);
+    this.logger.log(`* * * Passed Task ${context.State.Name} * * *`);
     const input = this.processInput(json, definition);
 
     return Promise.resolve({
