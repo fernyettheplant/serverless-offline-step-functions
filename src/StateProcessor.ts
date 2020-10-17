@@ -1,5 +1,6 @@
 import { JSONPath } from 'jsonpath-plus';
 import { PayloadTemplateType } from '../src/types/State';
+import { Context } from './Context/Context';
 import { LambdaWaitFotTokenPayloadTemplate } from './PayloadTemplates/LambdaWaitFotTokenPayloadTemplate';
 import { ParameterPayloadTemplate } from './PayloadTemplates/ParameterPayloadTemplate';
 
@@ -26,12 +27,15 @@ export class StateProcessor {
   public static processWaitForTokenParameters(
     dataJson: string | undefined | null,
     parameters: PayloadTemplateType,
-    taskToken: string,
+    context: Context,
   ): string {
     const inputJson = dataJson || '{}';
 
-    // Get correct PayloadTemplate based on the type of the resource (lambda/sqs/sns/etc.)
-    const payloadTemplate = LambdaWaitFotTokenPayloadTemplate.create(parameters);
+    /**
+     * Get correct PayloadTemplate based on the type of the resource (lambda/sqs/sns/etc.)
+     * For now, only lambdas are implemented
+     */
+    const payloadTemplate = LambdaWaitFotTokenPayloadTemplate.create(parameters, context);
 
     return JSON.stringify(payloadTemplate.process(inputJson));
   }

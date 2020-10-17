@@ -12,4 +12,12 @@ export class StateContext {
   get Name(): string {
     return this._name;
   }
+
+  get EnteredTime(): string {
+    return this._enteredTime;
+  }
+
+  get RetryCount(): number {
+    return this._retryCount;
+  }
 }

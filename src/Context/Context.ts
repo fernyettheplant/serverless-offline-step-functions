@@ -4,20 +4,20 @@ import { StateMachineContext } from './StateMachineContext';
 import { TaskContext } from './TaskContext';
 
 export class Context {
-  private _taskContext?: TaskContext;
-
   constructor(
     private readonly _executionContext: ExecutionContext,
     private readonly _stateMachineContext: StateMachineContext,
     private _stateContext: StateContext,
+    private _taskContext: TaskContext,
   ) {}
 
   public static create(
     executionContext: ExecutionContext,
     stateMachineContext: StateMachineContext,
     stateContext: StateContext,
+    taskContext: TaskContext = TaskContext.create(),
   ): Context {
-    return new Context(executionContext, stateMachineContext, stateContext);
+    return new Context(executionContext, stateMachineContext, stateContext, taskContext);
   }
 
   get Execution(): ExecutionContext {
@@ -32,7 +32,7 @@ export class Context {
     return this._stateContext;
   }
 
-  get Task(): TaskContext | undefined {
+  get Task(): TaskContext {
     return this._taskContext;
   }
 

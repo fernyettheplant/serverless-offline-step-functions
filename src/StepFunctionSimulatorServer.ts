@@ -4,7 +4,7 @@ import type { StepFunctions } from 'aws-sdk';
 
 import type { StateMachines } from './types/StateMachine';
 import type { StateDefinition } from './types/State';
-import { StateMachineExecutor } from './StateMachineExecutor';
+import { ExecuteType, StateMachineExecutor } from './StateMachineExecutor';
 import { Logger } from './utils/Logger';
 import { StateMachineContext } from './Context/StateMachineContext';
 import { ExecutionContext } from './Context/ExecutionContext';
@@ -22,6 +22,7 @@ export class StepFunctionSimulatorServer {
   // TODO: Move State Machines and type it
   private options: StepFunctionSimulatorServerOptions;
   private readonly logger: Logger;
+  private pendingStateMachineExecutions: { [key: string]: ExecuteType } = {};
 
   constructor(options: StepFunctionSimulatorServerOptions) {
     this.options = options;
@@ -71,7 +72,7 @@ export class StepFunctionSimulatorServer {
 
     const executionInput: StepFunctions.Types.StartExecutionInput = req.body;
     const stateMachineContext = StateMachineContext.create(executionInput.stateMachineArn);
-    const stateMachineToExecute = this.options.stateMachines[stateMachineContext.name];
+    const stateMachineToExecute = this.options.stateMachines[stateMachineContext.Name];
 
     if (!stateMachineToExecute) {
       return res.status(500);
@@ -94,11 +95,17 @@ export class StepFunctionSimulatorServer {
       resolve(res.status(200).json(output));
     });
 
-    await sme.execute(startAtState, executionContext.input);
-    // if (typeof executionResult === 'function') {
-    //   // Execution is not complete, we need to persist this to be able to resume
-    // } else {
-    //   // Nothing to do, execution is complete
-    // }
+    const executionResult = await sme.execute(startAtState, executionContext.Input);
+    if (typeof executionResult === 'function') {
+      // Execution is not complete, we need to persist this to be able to resume
+      this.pendingStateMachineExecutions[context.Task.Token] = executionResult;
+      console.log('WAITTTTTTTTIIIING');
+      setTimeout(() => {
+        console.log('RESTARTING STEP FUNC.......');
+        this.pendingStateMachineExecutions[context.Task.Token]();
+      }, 10000);
+    } else {
+      // Nothing to do, execution is complete
+    }
   }
 }

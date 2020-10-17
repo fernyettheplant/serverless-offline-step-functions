@@ -6,4 +6,8 @@ export class TaskContext {
   public static create(): TaskContext {
     return new TaskContext(uuid());
   }
+
+  get Token(): string {
+    return this._taskToken;
+  }
 }

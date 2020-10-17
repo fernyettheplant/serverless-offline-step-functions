@@ -1,3 +1,4 @@
+import { Context } from '../../Context/Context';
 import type { FailStateDefinition } from '../../types/State';
 import type { StateExecutorOutput } from '../../types/StateExecutorOutput';
 import { Logger } from '../../utils/Logger';
@@ -12,16 +13,12 @@ export class FailExecutor extends StateTypeExecutor {
     this.logger = Logger.getInstance();
   }
 
-  public execute(
-    stateMachineName: string,
-    stateName: string,
-    definition: FailStateDefinition,
-  ): Promise<StateExecutorOutput> {
-    this.logger.error(`StateMachine "${stateMachineName}" Failed on "${stateName}"`);
+  public execute(context: Context, definition: FailStateDefinition): Promise<StateExecutorOutput> {
+    this.logger.error(`StateMachine "${context.StateMachine.Name}" Failed on "${context.State.Name}"`);
 
     return Promise.reject(
       new FailExecutorException(
-        `StateMachine "${stateMachineName}" Failed on "${stateName}"`,
+        `StateMachine "${context.StateMachine.Name}" Failed on "${context.State.Name}"`,
         definition.Cause,
         definition.Error,
       ),

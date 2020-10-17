@@ -6,11 +6,11 @@ import { StateTypeExecutor } from '../StateTypeExecutor';
 import type { ChoiceStateDefinition } from '../../types/State';
 import type { ChoiceRule } from '../../types/State';
 import type { StateExecutorOutput } from '../../types/StateExecutorOutput';
+import { Context } from '../../Context/Context';
 
 export class ChoiceExecutor extends StateTypeExecutor {
   public async execute(
-    _stateMachineName: string,
-    _stateName: string,
+    context: Context,
     definition: ChoiceStateDefinition,
     json: string | undefined,
   ): Promise<StateExecutorOutput> {

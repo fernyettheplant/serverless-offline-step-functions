@@ -22,16 +22,32 @@ export class ExecutionContext {
     stateMachineContext: StateMachineContext,
     executionName: string,
   ): string {
-    const stateMachineArn = stateMachineContext.id;
+    const stateMachineArn = stateMachineContext.Id;
     const stateMachineExecutionArn = stateMachineArn.split(':').slice(0, 5);
     stateMachineExecutionArn.push('execution');
-    stateMachineExecutionArn.push(stateMachineContext.name);
+    stateMachineExecutionArn.push(stateMachineContext.Name);
     stateMachineExecutionArn.push(executionName);
 
     return stateMachineExecutionArn.join(':');
   }
 
-  get input(): string | undefined {
+  get Id(): string {
+    return this._id;
+  }
+
+  get Input(): string | undefined {
     return this._input;
+  }
+
+  get Name(): string {
+    return this._name;
+  }
+
+  get RoleArn(): string {
+    return this._roleArn;
+  }
+
+  get StartTime(): string {
+    return this._startTime;
   }
 }

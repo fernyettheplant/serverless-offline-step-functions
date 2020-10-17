@@ -6,11 +6,11 @@ export class StateMachineContext {
     return new StateMachineContext(id, name);
   }
 
-  get name(): string {
+  get Name(): string {
     return this._name;
   }
 
-  get id(): string {
+  get Id(): string {
     return this._id;
   }
 }

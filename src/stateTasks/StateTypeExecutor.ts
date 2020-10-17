@@ -1,10 +1,10 @@
+import { Context } from '../Context/Context';
 import type { StateDefinition } from '../types/State';
 import type { StateExecutorOutput } from '../types/StateExecutorOutput';
 
 export abstract class StateTypeExecutor {
   abstract execute(
-    stateMachineName: string,
-    stateName: string,
+    context: Context,
     definition: StateDefinition,
     inputJson: string | undefined,
   ): Promise<StateExecutorOutput>;

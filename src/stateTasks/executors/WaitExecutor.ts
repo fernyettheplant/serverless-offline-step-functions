@@ -1,5 +1,6 @@
 import delay from 'delay';
 import { JSONPath } from 'jsonpath-plus';
+import { Context } from '../../Context/Context';
 import { StateProcessor } from '../../StateProcessor';
 
 import type { WaitStateDefinition } from '../../types/State';
@@ -17,8 +18,7 @@ export class WaitExecutor extends StateTypeExecutor {
   }
 
   public async execute(
-    _stateMachineName: string,
-    _stateName: string,
+    context: Context,
     definition: WaitStateDefinition,
     inputJson: string | undefined,
   ): Promise<StateExecutorOutput> {
