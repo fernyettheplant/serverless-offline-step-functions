@@ -26,95 +26,18 @@ export class StateProcessor {
     return JSON.stringify(result[0]);
   }
 
-  private static isContextObjectPath(path: string) {
-    return path.startsWith('$$.');
-  }
-
-  private static isPathKey(path: string) {
-    return path.endsWith('.$');
-  }
-
-  private static processPathKey(key, value, inputJson) {
-    if (typeof value !== 'string') {
-      throw new Error(
-        `The value for the field '${key}' must be a STRING that contains a JSONPath but was an ${typeof value}`,
-      );
-    }
-
-    const newKey = key.substring(0, key.length - 2);
-
-    if (this.isContextObjectPath(value)) {
-      return { [newKey]: value.substring(3) };
-    } else {
-      const result = JSONPath({
-        path: value === undefined ? '$' : value,
-        json: JSON.parse(inputJson),
-      });
-
-      return { [newKey]: result[0] };
-    }
-  }
-
-  private static processPayloadTemplateEntry(
-    key: string,
-    value: unknown,
-    inputJson: string,
-  ): Record<string, unknown> {
-    if (this.isPathKey(key)) {
-      return this.processPathKey(key, value, inputJson);
-    }
-
-    if (typeof value === 'object' && value !== null) {
-      return {
-        [key]: this.processPayloadTemplate(
-          value as Record<string, unknown>,
-          inputJson,
-        ),
-      };
-    }
-
-    return { [key]: value };
-  }
-
-  private static processPayloadTemplate(
-    payloadTemplate: PayloadTemplate,
-    inputJson,
-  ): any {
-    let output = {};
-    Object.entries(payloadTemplate).forEach(
-      ([key, value]: [string, unknown]) => {
-        output = {
-          ...output,
-          ...this.processPayloadTemplateEntry(key, value, inputJson),
-        };
-      },
-    );
-    return output;
-  }
-
-  private static getWaitForTokenPayloadTemplate(
-    parameters,
-  ): WaitFotTokenPayloadTemplate {
-    return LambdaWaitFotTokenPayloadTemplate.create(parameters);
-  }
-
   public static processWaitForTokenParameters(
     dataJson: string | undefined | null,
     parameters: PayloadTemplate,
   ): string {
     const inputJson = dataJson || '{}';
 
-    const somthing: WaitFotTokenPayloadTemplate = this.getWaitForTokenPayloadTemplate(
+    // Get correct PayloadTemplate based on the type of the resource (lambda/sqs/sns/etc.)
+    const payloadTemplate = LambdaWaitFotTokenPayloadTemplate.create(
       parameters,
     );
 
-    if (typeof parameters.Payload !== 'object') {
-      return '{}';
-    }
-
-    const output = this.processPayloadTemplate(parameters.Payload, inputJson);
-
-    return JSON.stringify(output);
+    return JSON.stringify(payloadTemplate.process(inputJson));
   }
 
   public static processResultPath(json: string, resultPath?: string): string {
