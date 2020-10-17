@@ -110,11 +110,11 @@ type LambdaTaskStateParameters = {
   Payload?: Record<string, unknown>;
 };
 
-export type PayloadTemplate = LambdaTaskStateParameters & Record<string, unknown>;
+export type PayloadTemplateType = LambdaTaskStateParameters & Record<string, unknown>;
 
 export type TaskStateDefinition = CommonStateDefinition & {
   Resource: string;
-  Parameters?: PayloadTemplate;
+  Parameters?: PayloadTemplateType;
   ResultPath?: string;
   ResultSelector?: string;
   Retry?: TaskRetryRule[];

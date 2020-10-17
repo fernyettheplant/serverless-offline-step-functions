@@ -154,4 +154,97 @@ describe('StateProcessor', () => {
       });
     });
   });
+
+  describe('When there is a no waitForTaskToken', () => {
+    describe('When the Payload is undefined', () => {
+      ['{}', '{"something1": "something2", "haha": 123}'].map((val, index) => {
+        it(`should return nothing - ${index}`, () => {
+          const result = StateProcessor.processParameters(val);
+
+          expect(result).toEqual('{}');
+        });
+      });
+    });
+
+    describe('When the Payload is empty', () => {
+      ['{}', '{"something1": "something2", "haha": 123}'].map((val, index) => {
+        it(`should return nothing - ${index}`, () => {
+          const result = StateProcessor.processParameters(val, {});
+
+          expect(result).toEqual('{}');
+        });
+      });
+    });
+
+    describe('When the Payload is a constant JSON', () => {
+      [
+        { A: 'A', B: 123, C: { D: 'D' } },
+        { A: 'AElse', B: 123, C: { D: 'D' } },
+      ].map((Payload, index) => {
+        it(`should return stringified JSON - ${index}`, () => {
+          const result = StateProcessor.processParameters('', Payload);
+
+          expect(result).toEqual(JSON.stringify(Payload));
+        });
+
+        it(`should return stringified JSON - ${index}`, () => {
+          const result = StateProcessor.processParameters('{"something1": "something2", "haha": 123}', Payload);
+
+          expect(result).toEqual(JSON.stringify(Payload));
+        });
+      });
+    });
+
+    describe('When the Payload has a path at the root', () => {
+      it(`should fill that path`, () => {
+        const result = StateProcessor.processParameters('{"something1": "something2", "haha": 123}', {
+          'Something.$': '$.haha',
+        });
+
+        expect(result).toEqual(
+          JSON.stringify({
+            Something: 123,
+          }),
+        );
+      });
+    });
+
+    describe('When the Payload has a nested path', () => {
+      it(`should fill that path`, () => {
+        const result = StateProcessor.processParameters(
+          '{"something1": "something2", "haha": 123, "foo": {"bar": 456}}',
+          {
+            'Something.$': '$.foo.bar',
+          },
+        );
+
+        expect(result).toEqual(
+          JSON.stringify({
+            Something: 456,
+          }),
+        );
+      });
+    });
+
+    describe('When the Payload has a deeply nested path', () => {
+      it(`should fill that path`, () => {
+        const result = StateProcessor.processParameters(
+          '{"something1": "something2", "haha": 123, "foo": {"bar": 456}}',
+          {
+            Something: {
+              'foo.$': '$.foo.bar',
+            },
+          },
+        );
+
+        expect(result).toEqual(
+          JSON.stringify({
+            Something: {
+              foo: 456,
+            },
+          }),
+        );
+      });
+    });
+  });
 });

@@ -1,11 +1,3 @@
-export abstract class WaitFotTokenPayloadTemplate {
-  abstract process(inputJson: string): Record<string, unknown>;
+import { PayloadTemplate } from './PayloadTemplate';
 
-  protected isPathKey(path: string): boolean {
-    return path.endsWith('.$');
-  }
-
-  protected isContextObjectPath(path: string): boolean {
-    return path.startsWith('$$.');
-  }
-}
+export abstract class WaitFotTokenPayloadTemplate extends PayloadTemplate {}

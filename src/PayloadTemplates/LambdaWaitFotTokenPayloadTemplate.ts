@@ -1,14 +1,14 @@
 import { JSONPath } from 'jsonpath-plus';
-import { PayloadTemplate } from '../types/State';
+import { PayloadTemplateType } from '../types/State';
 import { WaitFotTokenPayloadTemplate } from './WaitForTokenPayloadTemplate';
 
 export class LambdaWaitFotTokenPayloadTemplate extends WaitFotTokenPayloadTemplate {
   private static acceptableParameterProperties = ['FunctionName', 'Payload'];
-  constructor(private readonly _payload: PayloadTemplate) {
+  constructor(private readonly _payload: PayloadTemplateType) {
     super();
   }
 
-  static create(payload: PayloadTemplate): LambdaWaitFotTokenPayloadTemplate {
+  static create(payload: PayloadTemplateType): LambdaWaitFotTokenPayloadTemplate {
     if (!payload.FunctionName) {
       throw new Error(`The field 'FunctionName' is required but was missing`);
     }
@@ -22,7 +22,7 @@ export class LambdaWaitFotTokenPayloadTemplate extends WaitFotTokenPayloadTempla
     return new LambdaWaitFotTokenPayloadTemplate(payload);
   }
 
-  private processPathKey(key, value, inputJson) {
+  protected processPathKey(key: string, value: unknown, inputJson: string): Record<string, unknown> {
     if (typeof value !== 'string') {
       throw new Error(
         `The value for the field '${key}' must be a STRING that contains a JSONPath but was an ${typeof value}`,
@@ -41,35 +41,6 @@ export class LambdaWaitFotTokenPayloadTemplate extends WaitFotTokenPayloadTempla
 
       return { [newKey]: result[0] };
     }
-  }
-
-  private processPayloadTemplateEntry(key: string, value: unknown, inputJson: string): Record<string, unknown> {
-    if (this.isPathKey(key)) {
-      return this.processPathKey(key, value, inputJson);
-    }
-
-    if (typeof value === 'object' && value !== null) {
-      return {
-        [key]: this.processPayloadTemplate(inputJson, value as Record<string, unknown>),
-      };
-    }
-
-    return { [key]: value };
-  }
-
-  private processPayloadTemplate(inputJson: string, payload?: Record<string, unknown>): any {
-    if (!payload) {
-      return {};
-    }
-
-    let output = {};
-    Object.entries(payload).forEach(([key, value]: [string, unknown]) => {
-      output = {
-        ...output,
-        ...this.processPayloadTemplateEntry(key, value, inputJson),
-      };
-    });
-    return output;
   }
 
   process(inputJson: string): Record<string, unknown> {
