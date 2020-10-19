@@ -22,6 +22,7 @@
     "compile:watch": "tsc --watch",
     "prepare": "npm run compile",
     "prepublishOnly": "npm run check:lint",
+    "test:unit": "jest ./src --config jest.config.js --coverage=false",
     "test:unit:watch": "jest ./src --config jest.config.js --coverage=false --watchAll"
   },
   "bugs": {
