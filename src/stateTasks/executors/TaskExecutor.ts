@@ -40,7 +40,7 @@ export class TaskExecutor extends StateTypeExecutor {
   }
 
   public isWaitForTaskToken(resource?: string): boolean {
-    if (resource && resource.endsWith('.waitForTaskToken')) {
+    if (resource && typeof resource === 'string' && resource.endsWith('.waitForTaskToken')) {
       return true;
     }
     return false;

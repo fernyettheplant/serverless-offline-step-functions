@@ -81,9 +81,9 @@ export class StepFunctionSimulatorServer {
       // Resume step function
 
       if (this.isSendTaskSuccess(req.body)) {
-        this.logger.log(`Got request for ${JSON.stringify(req.body)}`);
         if (typeof this.pendingStateMachineExecutions[req.body.taskToken] !== 'function') {
-          return res.status(404).json({ message: `No step function to resume with taskToken '${req.body.taskToken}'` });
+          this.logger.log(`No step function to resume with taskToken '${req.body.taskToken}.'`);
+          return;
         }
 
         this.pendingStateMachineExecutions[req.body.taskToken]();
