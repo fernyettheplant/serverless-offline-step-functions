@@ -59,9 +59,9 @@ export class StateMachineExecutor {
         this.logger.log(
           `Step function execution paused. \n Waiting for success or failure with task token "${this.context.Task.Token}"\n`,
         );
-        return executeNextState;
+        return executeNextState.bind(this);
       } else {
-        executeNextState();
+        return executeNextState();
       }
     } catch (error) {
       // TODO: Error Handling for State Errors including FailState. Must be done
