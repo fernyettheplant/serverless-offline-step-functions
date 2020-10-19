@@ -120,7 +120,7 @@ class ServerlessOfflineStepFunctionsPlugin {
         }
 
         if (!functionName) {
-          throw Error();
+          throw Error(`Could not find funciton name for resource ${resource}`);
         }
 
         const { handler } = definedFunctions[functionName];
