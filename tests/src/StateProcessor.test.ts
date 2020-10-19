@@ -1,30 +1,36 @@
+import { Context } from '../../src/Context/Context';
 import { StateProcessor } from '../../src/StateProcessor';
 
 describe('StateProcessor', () => {
+  const context = ({
+    Task: { Token: 'OneTaskToken' },
+    Execution: { Id: 'MyExecutionId' },
+    State: { EnteredTime: 'MyEnteredTime' },
+    StateMachine: { Id: 'MyStateMachineId' },
+  } as unknown) as Context;
   describe('Parameters', () => {
     describe('When there is a waitForTaskToken', () => {
       describe('When the resource is a lambda', () => {
         it('should throw if FunctionName is not defined', () => {
-          expect(() => StateProcessor.processWaitForTokenParameters('{}', {})).toThrow(
+          expect(() => StateProcessor.processWaitForTokenParameters('{}', {}, context)).toThrow(
             `The field 'FunctionName' is required but was missing`,
           );
         });
 
         it(`should throw if there are extra fields that isn't part of the lambda`, () => {
           expect(() =>
-            StateProcessor.processWaitForTokenParameters('{}', {
-              FunctionName: 'funcName',
-              Something: 'a string',
-            }),
+            StateProcessor.processWaitForTokenParameters(
+              '{}',
+              { FunctionName: 'funcName', Something: 'a string' },
+              context,
+            ),
           ).toThrow(`The field "Something" is not supported by Step Functions`);
         });
 
         describe('When the Payload is undefined', () => {
           ['{}', '{"something1": "something2", "haha": 123}'].map((val, index) => {
             it(`should return nothing - ${index}`, () => {
-              const result = StateProcessor.processWaitForTokenParameters(val, {
-                FunctionName: 'funcName',
-              });
+              const result = StateProcessor.processWaitForTokenParameters(val, { FunctionName: 'funcName' }, context);
 
               expect(result).toEqual('{}');
             });
@@ -34,10 +40,11 @@ describe('StateProcessor', () => {
         describe('When the Payload is empty', () => {
           ['{}', '{"something1": "something2", "haha": 123}'].map((val, index) => {
             it(`should return nothing - ${index}`, () => {
-              const result = StateProcessor.processWaitForTokenParameters(val, {
-                FunctionName: 'funcName',
-                Payload: {},
-              });
+              const result = StateProcessor.processWaitForTokenParameters(
+                val,
+                { FunctionName: 'funcName', Payload: {} },
+                context,
+              );
 
               expect(result).toEqual('{}');
             });
@@ -50,19 +57,24 @@ describe('StateProcessor', () => {
             { A: 'AElse', B: 123, C: { D: 'D' } },
           ].map((Payload, index) => {
             it(`should return stringified JSON - ${index}`, () => {
-              const result = StateProcessor.processWaitForTokenParameters('', {
-                FunctionName: 'funcName',
-                Payload,
-              });
+              const result = StateProcessor.processWaitForTokenParameters(
+                '',
+                { FunctionName: 'funcName', Payload },
+                context,
+              );
 
               expect(result).toEqual(JSON.stringify(Payload));
             });
 
             it(`should return stringified JSON - ${index}`, () => {
-              const result = StateProcessor.processWaitForTokenParameters('{"something1": "something2", "haha": 123}', {
-                FunctionName: 'funcName',
-                Payload,
-              });
+              const result = StateProcessor.processWaitForTokenParameters(
+                '{"something1": "something2", "haha": 123}',
+                {
+                  FunctionName: 'funcName',
+                  Payload,
+                },
+                context,
+              );
 
               expect(result).toEqual(JSON.stringify(Payload));
             });
@@ -71,12 +83,16 @@ describe('StateProcessor', () => {
 
         describe('When the Payload has a path at the root', () => {
           it(`should fill that path`, () => {
-            const result = StateProcessor.processWaitForTokenParameters('{"something1": "something2", "haha": 123}', {
-              FunctionName: 'funcName',
-              Payload: {
-                'Something.$': '$.haha',
+            const result = StateProcessor.processWaitForTokenParameters(
+              '{"something1": "something2", "haha": 123}',
+              {
+                FunctionName: 'funcName',
+                Payload: {
+                  'Something.$': '$.haha',
+                },
               },
-            });
+              context,
+            );
 
             expect(result).toEqual(
               JSON.stringify({
@@ -96,6 +112,7 @@ describe('StateProcessor', () => {
                   'Something.$': '$.foo.bar',
                 },
               },
+              context,
             );
 
             expect(result).toEqual(
@@ -118,6 +135,7 @@ describe('StateProcessor', () => {
                   },
                 },
               },
+              context,
             );
 
             expect(result).toEqual(
@@ -142,12 +160,13 @@ describe('StateProcessor', () => {
                   },
                 },
               },
+              context,
             );
 
             expect(result).toEqual(
               JSON.stringify({
                 Something: {
-                  foo: 'Task.Token',
+                  foo: 'OneTaskToken',
                 },
               }),
             );
@@ -312,7 +331,7 @@ describe('StateProcessor', () => {
         it(`should return nothing - ${index}`, () => {
           const result = StateProcessor.processParameters(val);
 
-          expect(result).toEqual('{}');
+          expect(result).toEqual(val);
         });
       });
     });
