@@ -8,6 +8,7 @@ import type { TaskStateDefinition } from '../../types/State';
 import { StateInfoHandler } from '../../StateInfoHandler';
 import { StateProcessor } from '../../StateProcessor';
 import { Context } from '../../Context/Context';
+import { Retriers } from '../../types/Retriers';
 
 export class TaskExecutor extends StateTypeExecutor {
   public async execute(
@@ -27,7 +28,16 @@ export class TaskExecutor extends StateTypeExecutor {
     const functionLambda = await import(`${lambdaPath}`);
 
     this.injectEnvVarsLambdaSpecific(stateInfo.environment);
-    const output = await functionLambda[stateInfo.handlerName](input, context);
+
+    // eslint-disable-next-line @typescript-eslint/ban-types
+    let output: any;
+    if (stateDefinition.Retry) {
+      const retrier = Retriers.create(stateDefinition.Retry);
+      output = await retrier.retry(functionLambda[stateInfo.handlerName].bind(this, input, context));
+    } else {
+      output = await functionLambda[stateInfo.handlerName](input, context);
+    }
+
     this.removeEnvVarsLambdaSpecific(stateInfo.environment);
 
     const outputJson = this.processOutput(input, output, stateDefinition);
