@@ -1,5 +1,6 @@
-import { Retrier, StatesErrors } from './Retrier';
+import { Retrier } from './Retrier';
 import { TaskRetryRule } from './State';
+import { StatesErrors } from './StatesErrors';
 
 export class Retriers {
   private constructor(private readonly _retriers: Retrier[]) {}

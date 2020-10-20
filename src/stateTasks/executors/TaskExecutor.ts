@@ -9,6 +9,8 @@ import { StateInfoHandler } from '../../StateInfoHandler';
 import { StateProcessor } from '../../StateProcessor';
 import { Context } from '../../Context/Context';
 import { Retriers } from '../../types/Retriers';
+import { Catchers } from '../../types/Catchers';
+import { StatesErrors } from '../../types/StatesErrors';
 
 export class TaskExecutor extends StateTypeExecutor {
   public async execute(
@@ -31,11 +33,17 @@ export class TaskExecutor extends StateTypeExecutor {
 
     // eslint-disable-next-line @typescript-eslint/ban-types
     let output: any;
-    if (stateDefinition.Retry) {
-      const retrier = Retriers.create(stateDefinition.Retry);
-      output = await retrier.retry(functionLambda[stateInfo.handlerName].bind(this, input, context));
-    } else {
-      output = await functionLambda[stateInfo.handlerName](input, context);
+    try {
+      if (stateDefinition.Retry) {
+        const retrier = Retriers.create(stateDefinition.Retry);
+        output = await retrier.retry(() => functionLambda[stateInfo.handlerName](input, context));
+      } else {
+        output = await functionLambda[stateInfo.handlerName](input, context);
+      }
+    } catch (error) {
+      this.removeEnvVarsLambdaSpecific(stateInfo.environment);
+
+      return this.dealWithError(stateDefinition, error, input);
     }
 
     this.removeEnvVarsLambdaSpecific(stateInfo.environment);
@@ -56,7 +64,33 @@ export class TaskExecutor extends StateTypeExecutor {
     return false;
   }
 
-  private processInput(json: string | undefined, stateDefinition: TaskStateDefinition, context: Context): any {
+  private dealWithError(stateDefinition: TaskStateDefinition, error: Error, input: Record<string, unknown>) {
+    if (!stateDefinition.Catch) {
+      throw error;
+    }
+
+    const catchers = Catchers.create(stateDefinition.Catch);
+    const catcher = catchers.getCatcherBasedOn([StatesErrors.TaskFailed, StatesErrors.All]);
+
+    if (!catcher) {
+      throw error;
+    }
+
+    const output = { message: error.message, stack: error.stack };
+    const outputJson = StateProcessor.processResultPath(input, output, catcher.ResultPath);
+
+    return {
+      Next: catcher.Next,
+      End: stateDefinition.End,
+      json: outputJson,
+    };
+  }
+
+  private processInput(
+    json: string | undefined,
+    stateDefinition: TaskStateDefinition,
+    context: Context,
+  ): StateExecutorOutput {
     const proccessedInputJson = StateProcessor.processInputPath(json, stateDefinition.InputPath);
 
     let output = proccessedInputJson;
