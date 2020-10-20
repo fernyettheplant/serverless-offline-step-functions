@@ -1,4 +1,5 @@
-import { Retrier, StatesErrors } from '../../src/types/Retrier';
+import { Retrier } from '../../src/types/Retrier';
+import { StatesErrors } from '../../src/types/StatesErrors';
 
 describe('Retrier', () => {
   describe('when the function succeeds', () => {

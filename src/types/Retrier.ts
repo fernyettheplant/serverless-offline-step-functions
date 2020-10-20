@@ -1,12 +1,5 @@
 import { TaskRetryRule } from './State';
-
-export enum StatesErrors {
-  DataLimitExceeded = 'States.DataLimitExceeded',
-  Runtime = 'States.Runtime',
-  Timeout = 'States.Timeout',
-  TaskFailed = 'States.TaskFailed',
-  Permissions = 'States.Permissions',
-}
+import { StatesErrors } from './StatesErrors';
 
 export class Retrier {
   private currentNumberOfRetries = 0;
@@ -31,15 +24,22 @@ export class Retrier {
   }
 
   async retry(fn: () => any): Promise<any> {
+    let output: unknown;
     try {
-      return await fn();
+      output = await fn();
+      return output;
     } catch (error) {
       if (this.currentNumberOfRetries < this._MaxAttempts) {
         this.currentNumberOfRetries++;
-        return await new Promise((resolve) => {
+        return await new Promise((resolve, reject) => {
           setTimeout(async () => {
             this.currentIntervalSeconds = this.currentIntervalSeconds * this._BackoffRate;
-            return resolve(await this.retry(fn));
+            try {
+              const output = await this.retry(fn);
+              return resolve(output);
+            } catch (error) {
+              return reject(error);
+            }
           }, this.currentIntervalSeconds * 1000);
         });
       } else {

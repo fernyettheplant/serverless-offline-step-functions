@@ -1,6 +1,6 @@
 import type { StateMachineDefinition } from './StateMachine';
 import { StateType } from '../stateTasks/StateType';
-import { StatesErrors } from './Retrier';
+import { StatesErrors } from './StatesErrors';
 
 export type StateInfo = {
   handlerPath: string;
