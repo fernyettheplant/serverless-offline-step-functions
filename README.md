@@ -68,7 +68,7 @@ plugins:
 
 | States | Notes |
 | ------ | ------ |
-| ***Task*** | `Retry/Catch`, `Timeout` and `Heartbeat` are not supported yet. |
+| ***Task*** | Retry/Catch now supported!, `Timeout` and `Heartbeat` are not supported yet. |
 | ***Choice*** | ✅ |
 | ***Wait***  | ✅ |
 | ***Parallel*** | Not Supported at all yet. |
