@@ -1,5 +1,6 @@
 import type { StateMachineDefinition } from './StateMachine';
 import { StateType } from '../stateTasks/StateType';
+import { StatesErrors } from './Retrier';
 
 export type StateInfo = {
   handlerPath: string;
@@ -84,23 +85,15 @@ export type PassStateDefinition = CommonStateDefinition & {
   Parameters?: string; // TODO: TBD
 };
 
-export type TaskErrorName =
-  | 'State.ALL'
-  | 'States.DataLimitExceeded'
-  | 'States.Runtime'
-  | 'States.Timeout'
-  | 'States.TaskFailed'
-  | 'States.Permissions';
-
 export type TaskRetryRule = {
-  ErrorEquals: TaskErrorName[];
+  ErrorEquals: StatesErrors[];
   IntervalSeconds?: number;
   MaxAttempts?: number;
   BackoffRate?: number;
 };
 
 export type TaskCatchRule = {
-  ErrorEquals: TaskErrorName[];
+  ErrorEquals: StatesErrors[];
   Next: string;
   ResultPath?: string;
 };
