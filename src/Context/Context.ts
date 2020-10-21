@@ -36,6 +36,10 @@ export class Context {
     return this._taskContext;
   }
 
+  public clone(): Context {
+    return new Context(this._executionContext, this._stateMachineContext, this._stateContext, this._taskContext);
+  }
+
   transitionTo(state: StateContext, task: TaskContext = TaskContext.create()): void {
     this._stateContext = state;
     this._taskContext = task;

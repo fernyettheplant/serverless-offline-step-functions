@@ -91,7 +91,9 @@ export class TaskExecutor extends StateTypeExecutor {
     stateDefinition: TaskStateDefinition,
     context: Context,
   ): StateExecutorOutput {
+    this.logger.debug(`TaskExecutor - processInput1 - ${json}`);
     const proccessedInputJson = StateProcessor.processInputPath(json, stateDefinition.InputPath);
+    this.logger.debug(`TaskExecutor - processInput2 - ${proccessedInputJson}`);
 
     let output = proccessedInputJson;
 
@@ -101,7 +103,12 @@ export class TaskExecutor extends StateTypeExecutor {
       output = StateProcessor.processParameters(proccessedInputJson, stateDefinition.Parameters);
     }
 
-    return JSON.parse(output);
+    try {
+      return JSON.parse(output);
+    } catch (error) {
+      this.logger.error(`processInput: Could not parse JSON for state ${context.State.Name}: "${output}"`);
+      throw error;
+    }
   }
 
   private processOutput(
@@ -109,10 +116,12 @@ export class TaskExecutor extends StateTypeExecutor {
     output: Record<string, unknown>,
     stateDefinition: TaskStateDefinition,
   ): string {
+    this.logger.debug(`TaskExecutor - processOutput1 - ${output}`);
     let outputJson = output ? JSON.stringify(output) : '{}';
 
     // TODO: Do Result Selector
     outputJson = StateProcessor.processResultPath(input, output, stateDefinition.ResultPath);
+    this.logger.debug(`TaskExecutor - processOutput2 - ${outputJson}`);
     outputJson = StateProcessor.processOutputPath(outputJson, stateDefinition.OutputPath);
 
     return outputJson;
