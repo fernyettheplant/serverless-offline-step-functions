@@ -36,11 +36,12 @@ export class TaskExecutor extends StateTypeExecutor {
     try {
       if (stateDefinition.Retry) {
         const retrier = Retriers.create(stateDefinition.Retry);
-        output = await retrier.retry(() => functionLambda[stateInfo.handlerName](input, context));
+        output = await retrier.retry(() => functionLambda[stateInfo.handlerName](input, context), context);
       } else {
         output = await functionLambda[stateInfo.handlerName](input, context);
       }
     } catch (error) {
+      this.logger.error(`Caught an error in Catcher: ${error.stack}`);
       this.removeEnvVarsLambdaSpecific(stateInfo.environment);
 
       return this.dealWithError(stateDefinition, error, input);
@@ -78,6 +79,7 @@ export class TaskExecutor extends StateTypeExecutor {
 
     const output = { message: error.message, stack: error.stack };
     const outputJson = StateProcessor.processResultPath(input, output, catcher.ResultPath);
+    this.logger.log(`Using Next state of Catcher: ${catcher.Next}`);
 
     return {
       Next: catcher.Next,
@@ -106,7 +108,7 @@ export class TaskExecutor extends StateTypeExecutor {
     try {
       return JSON.parse(output);
     } catch (error) {
-      this.logger.error(`processInput: Could not parse JSON for state ${context.State.Name}: "${output}"`);
+      this.logger.error(`TaskExecutor.processInput: Could not parse JSON for state ${context.State.Name}: "${output}"`);
       throw error;
     }
   }
