@@ -7,7 +7,8 @@ import type { ServerlessOfflineHooks } from './types/ServerlessOfflineHooks';
 import { StepFunctionSimulatorServer } from './StepFunctionSimulatorServer';
 import { StateInfoHandler } from './StateInfoHandler';
 import { Logger } from './utils/Logger';
-import { TaskStateDefinition } from './types/State';
+import { MapStateDefinition, StateDefinition, TaskStateDefinition } from './types/State';
+import { StateType } from './stateTasks/StateType';
 
 class ServerlessOfflineStepFunctionsPlugin {
   public hooks?: ServerlessOfflineHooks;
@@ -17,10 +18,12 @@ class ServerlessOfflineStepFunctionsPlugin {
   private cliOptions: CLIOptions;
   private options?: ServerlessOfflineStepFunctionsOptions;
   private stepFunctionSimulatorServer?: StepFunctionSimulatorServer;
+  private logger: Logger;
 
   constructor(serverless: Record<any, any>, cliOptions: CLIOptions) {
     this.serverless = serverless;
     this.cliOptions = cliOptions;
+    this.logger = Logger.getInstance();
 
     this.commands = {
       '@fernthedev/serverless-offline-step-functions': {
@@ -41,7 +44,7 @@ class ServerlessOfflineStepFunctionsPlugin {
 
     if (this.options?.enabled === false) {
       // Simulator Will not be executed
-      Logger.getInstance().warning('Simulator will not execute.');
+      this.logger.warning('Simulator will not execute.');
       return;
     }
 
@@ -84,54 +87,72 @@ class ServerlessOfflineStepFunctionsPlugin {
     };
   }
 
-  private resolveHandlers(definedStateMachines: any) {
+  private getFunctionName(stateOptions: StateDefinition): string {
+    let functionName: string | undefined;
+    const resource: string | Record<string, string[]> = (stateOptions as any).Resource;
+
+    if (typeof resource === 'string') {
+      if (resource.endsWith('.waitForTaskToken')) {
+        functionName = (stateOptions as TaskStateDefinition).Parameters?.FunctionName?.['Fn::GetAtt'][0];
+      } else {
+        functionName = resource.split('-').slice(-1)[0];
+      }
+    } else {
+      // probably an object
+      for (const [key, value] of Object.entries(resource)) {
+        if (key === 'Fn::GetAtt') {
+          functionName = value[0];
+        }
+      }
+    }
+
+    if (!functionName) {
+      throw Error(`Could not find funciton name for resource ${resource}`);
+    }
+
+    return functionName;
+  }
+
+  private setStateInfo(states: [string, StateDefinition][], stateMachineName: string) {
     const definedFunctions = this.serverless.service.initialServerlessConfig.functions;
     const statesInfoHandler = StateInfoHandler.getInstance();
+    this.logger.debug(`ServerlessOfflineStepFunctionsPlugin - setStateInfo - ${states}`);
+
+    for (const [stateName, stateOptions] of states) {
+      // TODO: Instead of checking the types here, we should create objects that have meaning
+      if (stateOptions.Type === StateType.Map) {
+        const stateDefinition: [string, StateDefinition][] = Object.entries(
+          (stateOptions as MapStateDefinition).Iterator.States,
+        );
+        this.setStateInfo(stateDefinition, stateMachineName);
+        continue;
+      }
+
+      if (stateOptions.Type !== StateType.Task) {
+        continue;
+      }
+
+      const functionName = this.getFunctionName(stateOptions as StateDefinition);
+
+      const { handler } = definedFunctions[functionName];
+      const indexOfHandlerNameSeparator = handler.lastIndexOf('.');
+      const handlerPath = handler.substring(0, indexOfHandlerNameSeparator);
+      const handlerName = handler.substring(indexOfHandlerNameSeparator + 1);
+      const environment: Record<string, string> | undefined = this.serverless.service.initialServerlessConfig
+        ?.functions[functionName]?.environment;
+
+      statesInfoHandler.setStateInfo(stateMachineName, stateName, handlerPath, handlerName, environment);
+    }
+  }
+
+  private resolveHandlers(definedStateMachines: any) {
     const definedStateMachinesArr = Object.entries(definedStateMachines);
 
     // Per StateMachine
     for (const [stateMachineName, stateMachineOptions] of definedStateMachinesArr) {
-      const states = Object.entries((stateMachineOptions as any).definition.States);
+      const states: [string, StateDefinition][] = Object.entries((stateMachineOptions as any).definition.States);
 
-      // Per State in the StateMachine
-      for (const [stateName, stateOptions] of states) {
-        if (!(stateOptions as any)?.Resource) {
-          // The State Machine in here could be a Pass, Failed or Wait
-          break;
-        }
-
-        let functionName: string | undefined;
-        const resource: string | Record<string, string[]> = (stateOptions as any).Resource;
-
-        // TODO: To extract this to a function/class
-        if (typeof resource === 'string') {
-          if (resource.endsWith('.waitForTaskToken')) {
-            functionName = (stateOptions as TaskStateDefinition).Parameters?.FunctionName?.['Fn::GetAtt'][0];
-          } else {
-            functionName = resource.split('-').slice(-1)[0];
-          }
-        } else {
-          // probably an object
-          for (const [key, value] of Object.entries(resource)) {
-            if (key === 'Fn::GetAtt') {
-              functionName = value[0];
-            }
-          }
-        }
-
-        if (!functionName) {
-          throw Error(`Could not find funciton name for resource ${resource}`);
-        }
-
-        const { handler } = definedFunctions[functionName];
-        const indexOfHandlerNameSeparator = handler.lastIndexOf('.');
-        const handlerPath = handler.substring(0, indexOfHandlerNameSeparator);
-        const handlerName = handler.substring(indexOfHandlerNameSeparator + 1);
-        const environment: Record<string, string> | undefined = this.serverless.service.initialServerlessConfig
-          ?.functions[functionName]?.environment;
-
-        statesInfoHandler.setStateInfo(stateMachineName, stateName, handlerPath, handlerName, environment);
-      }
+      this.setStateInfo(states, stateMachineName);
     }
   }
 

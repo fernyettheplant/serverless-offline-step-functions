@@ -37,6 +37,8 @@ export class StateMachineExecutor {
     try {
       stateExecutorOutput = await typeExecutor.execute(this.context, stateDefinition, inputJson);
 
+      this.logger.debug(`StateMachineExecutor - execute1 - ${stateExecutorOutput}`);
+
       if (stateExecutorOutput.End) {
         this.logger.log(`[${this.context.State.Name}] State Machine Ended`);
         return stateExecutorOutput.json;
