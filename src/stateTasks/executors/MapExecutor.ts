@@ -6,6 +6,7 @@ import { Context } from '../../Context/Context';
 import { ExecuteType, StateMachineExecutor } from '../../StateMachineExecutor';
 import { StateMachine } from '../../types/StateMachine';
 import { StateContext } from '../../Context/StateContext';
+import { StateProcessor } from '../../StateProcessor';
 
 export class MapExecutor extends StateTypeExecutor {
   private pendingStateMachineExecutions: { [key: string]: ExecuteType } = {};
@@ -27,7 +28,15 @@ export class MapExecutor extends StateTypeExecutor {
       throw new Error(`Undefined inputJson for state `);
     }
 
-    const iterable = JSON.parse(inputJson);
+    const iterable = this.processInput(inputJson, stateDefinition, context);
+
+    if (!Array.isArray(iterable)) {
+      this.logger.error(
+        `Processed input is not an array with InputPath: ${stateDefinition.InputPath} and input: ${inputJson}`,
+      );
+      throw new Error('Input is not an array');
+    }
+
     type MyType = ExecuteType | string | void;
     const output: MyType[] = [];
     await Promise.all(
@@ -50,5 +59,23 @@ export class MapExecutor extends StateTypeExecutor {
       End: stateDefinition.End,
       json: JSON.stringify(output),
     };
+  }
+
+  // TODO: Extract to a common place for Map & Task executors
+  private processInput(json: string | undefined, stateDefinition: MapStateDefinition, context: Context): unknown {
+    this.logger.debug(`MapExecutor - processInput1 - ${json}`);
+    const proccessedInputJson = StateProcessor.processInputPath(json, stateDefinition.ItemsPath);
+    this.logger.debug(`MapExecutor - processInput2 - ${proccessedInputJson}`);
+
+    // TODO: Implement Parameters
+
+    try {
+      return JSON.parse(proccessedInputJson);
+    } catch (error) {
+      this.logger.error(
+        `MapExecutor.processInput: Could not parse JSON for state ${context.State.Name}: "${proccessedInputJson}"`,
+      );
+      throw error;
+    }
   }
 }
