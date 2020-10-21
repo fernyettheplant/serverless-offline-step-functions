@@ -13,6 +13,7 @@ Serverless Offline Plugin to Support Step Functions for Local Development.
 
 - Fully Written in TypeScript
 - Promise based (no process spawn)
+- Completely based on AWS Docs
 
 ## Sponsor
 
@@ -59,7 +60,7 @@ If your project uses `serverless-webpack` to compile/transpile your serverless a
 ```yml
 plugins:
   - serverless-webpack # Defined Before
-  - serverless-step-functions
+  - serverless-step-functions # Defined Before
   - '@fernthedev/serverless-offline-step-functions'
   - serverless-offline
 ```
@@ -75,7 +76,7 @@ plugins:
 | ***Pass*** | ✅ |
 | ***Fail***| ✅ |
 | ***Succeed***|✅|
-| ***Map*** | Not Supported at all yet. |
+| ***Map*** | Basic Support ✅ |
 
 ## Credits and inspiration
 
