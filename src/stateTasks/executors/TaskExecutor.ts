@@ -47,6 +47,11 @@ export class TaskExecutor extends StateTypeExecutor {
       return this.dealWithError(stateDefinition, error, input);
     }
 
+    // Default ot Empty object if output is from a void function
+    if (output === undefined) {
+      output = {};
+    }
+
     this.removeEnvVarsLambdaSpecific(stateInfo.environment);
 
     const outputJson = this.processOutput(input, output, stateDefinition);
