@@ -29,7 +29,7 @@ export class TaskExecutor extends StateTypeExecutor {
     const lambdaPath = await this.getWebpackOrCommonFuction(stateInfo.handlerPath);
     const functionLambda = await import(`${lambdaPath}`);
 
-    this.injectEnvVarsLambdaSpecific(stateInfo.environment);
+    this.envVarResolver.injectEnvVarsLambdaSpecific(stateInfo.environment);
 
     // eslint-disable-next-line @typescript-eslint/ban-types
     let output: any;
@@ -42,7 +42,7 @@ export class TaskExecutor extends StateTypeExecutor {
       }
     } catch (error) {
       this.logger.error(`Caught an error in Catcher: ${error.stack}`);
-      this.removeEnvVarsLambdaSpecific(stateInfo.environment);
+      this.envVarResolver.removeEnvVarsLambdaSpecific(stateInfo.environment);
 
       return this.dealWithError(stateDefinition, error, input);
     }
@@ -52,7 +52,7 @@ export class TaskExecutor extends StateTypeExecutor {
       output = {};
     }
 
-    this.removeEnvVarsLambdaSpecific(stateInfo.environment);
+    this.envVarResolver.removeEnvVarsLambdaSpecific(stateInfo.environment);
 
     const outputJson = this.processOutput(input, output, stateDefinition);
 
@@ -146,25 +146,5 @@ export class TaskExecutor extends StateTypeExecutor {
     }
 
     return filePathResolved;
-  }
-
-  private injectEnvVarsLambdaSpecific(lambdaEnv: Record<string, string> | undefined): void {
-    if (!lambdaEnv) {
-      return;
-    }
-
-    Object.entries(lambdaEnv).forEach(([key, value]) => {
-      process.env[key] = value;
-    });
-  }
-
-  private removeEnvVarsLambdaSpecific(lambdaEnv: Record<string, string> | undefined): void {
-    if (!lambdaEnv) {
-      return;
-    }
-
-    Object.keys(lambdaEnv).forEach((key) => {
-      delete process.env[key];
-    });
   }
 }
