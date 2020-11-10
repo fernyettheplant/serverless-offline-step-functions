@@ -9,6 +9,7 @@ import { StateInfoHandler } from './StateInfoHandler';
 import { Logger } from './utils/Logger';
 import { MapStateDefinition, StateDefinition, TaskStateDefinition } from './types/State';
 import { StateType } from './stateTasks/StateType';
+import { EnvVarResolver } from './utils/EnvVarResolver';
 
 class ServerlessOfflineStepFunctionsPlugin {
   public hooks?: ServerlessOfflineHooks;
@@ -56,7 +57,10 @@ class ServerlessOfflineStepFunctionsPlugin {
   }
 
   private start() {
-    this.injectGlobalEnvVars();
+    const envVarResolver = EnvVarResolver.getInstance();
+    envVarResolver.global = this.serverless.service.initialServerlessConfig?.provider?.environment;
+    envVarResolver.injectGlobalEnvVars();
+
     // Get Handler and Path of the Local Functions
     const definedStateMachines = this.serverless.service.initialServerlessConfig?.stepFunctions?.stateMachines;
 
@@ -153,17 +157,6 @@ class ServerlessOfflineStepFunctionsPlugin {
       const states: [string, StateDefinition][] = Object.entries((stateMachineOptions as any).definition.States);
 
       this.setStateInfo(states, stateMachineName);
-    }
-  }
-
-  private injectGlobalEnvVars() {
-    const providerEnvironment: Record<string, string> | undefined = this.serverless.service.initialServerlessConfig
-      ?.provider?.environment;
-
-    if (providerEnvironment) {
-      Object.entries(providerEnvironment).forEach(([key, value]) => {
-        process.env[key] = value;
-      });
     }
   }
 }
