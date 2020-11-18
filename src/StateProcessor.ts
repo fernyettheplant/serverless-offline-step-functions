@@ -3,9 +3,13 @@ import { PayloadTemplateType } from '../src/types/State';
 import { Context } from './Context/Context';
 import { LambdaWaitFotTokenPayloadTemplate } from './PayloadTemplates/LambdaWaitFotTokenPayloadTemplate';
 import { ParameterPayloadTemplate } from './PayloadTemplates/ParameterPayloadTemplate';
+import { Logger } from './utils/Logger';
 
 export class StateProcessor {
+  protected static logger: Logger = Logger.getInstance();
+
   public static processInputPath(dataJson: string | undefined | null, inputPath: string | null | undefined): string {
+    this.logger.debug(`StateProcessor - processInputPath - ${dataJson}`);
     if (inputPath === null) {
       return '{}';
     }

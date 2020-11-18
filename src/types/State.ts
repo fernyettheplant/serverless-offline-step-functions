@@ -145,6 +145,7 @@ export type ParallelStateDefinition = CommonStateDefinition & {
 
 export type StateDefinition =
   | PassStateDefinition
+  | MapStateDefinition
   | TaskStateDefinition
   | FailStateDefinition
   | SucceedStateDefinition

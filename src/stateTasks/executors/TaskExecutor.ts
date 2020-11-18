@@ -29,24 +29,30 @@ export class TaskExecutor extends StateTypeExecutor {
     const lambdaPath = await this.getWebpackOrCommonFuction(stateInfo.handlerPath);
     const functionLambda = await import(`${lambdaPath}`);
 
-    this.injectEnvVarsLambdaSpecific(stateInfo.environment);
+    this.envVarResolver.injectEnvVarsLambdaSpecific(stateInfo.environment);
 
     // eslint-disable-next-line @typescript-eslint/ban-types
     let output: any;
     try {
       if (stateDefinition.Retry) {
         const retrier = Retriers.create(stateDefinition.Retry);
-        output = await retrier.retry(() => functionLambda[stateInfo.handlerName](input, context));
+        output = await retrier.retry(() => functionLambda[stateInfo.handlerName](input, context), context);
       } else {
         output = await functionLambda[stateInfo.handlerName](input, context);
       }
     } catch (error) {
-      this.removeEnvVarsLambdaSpecific(stateInfo.environment);
+      this.logger.error(`Caught an error in Catcher: ${error.stack}`);
+      this.envVarResolver.removeEnvVarsLambdaSpecific(stateInfo.environment);
 
       return this.dealWithError(stateDefinition, error, input);
     }
 
-    this.removeEnvVarsLambdaSpecific(stateInfo.environment);
+    // Default ot Empty object if output is from a void function
+    if (output === undefined) {
+      output = {};
+    }
+
+    this.envVarResolver.removeEnvVarsLambdaSpecific(stateInfo.environment);
 
     const outputJson = this.processOutput(input, output, stateDefinition);
 
@@ -78,6 +84,7 @@ export class TaskExecutor extends StateTypeExecutor {
 
     const output = { message: error.message, stack: error.stack };
     const outputJson = StateProcessor.processResultPath(input, output, catcher.ResultPath);
+    this.logger.log(`Using Next state of Catcher: ${catcher.Next}`);
 
     return {
       Next: catcher.Next,
@@ -91,7 +98,9 @@ export class TaskExecutor extends StateTypeExecutor {
     stateDefinition: TaskStateDefinition,
     context: Context,
   ): StateExecutorOutput {
+    this.logger.debug(`TaskExecutor - processInput1 - ${json}`);
     const proccessedInputJson = StateProcessor.processInputPath(json, stateDefinition.InputPath);
+    this.logger.debug(`TaskExecutor - processInput2 - ${proccessedInputJson}`);
 
     let output = proccessedInputJson;
 
@@ -101,7 +110,12 @@ export class TaskExecutor extends StateTypeExecutor {
       output = StateProcessor.processParameters(proccessedInputJson, stateDefinition.Parameters);
     }
 
-    return JSON.parse(output);
+    try {
+      return JSON.parse(output);
+    } catch (error) {
+      this.logger.error(`TaskExecutor.processInput: Could not parse JSON for state ${context.State.Name}: "${output}"`);
+      throw error;
+    }
   }
 
   private processOutput(
@@ -109,10 +123,12 @@ export class TaskExecutor extends StateTypeExecutor {
     output: Record<string, unknown>,
     stateDefinition: TaskStateDefinition,
   ): string {
+    this.logger.debug(`TaskExecutor - processOutput1 - ${output}`);
     let outputJson = output ? JSON.stringify(output) : '{}';
 
     // TODO: Do Result Selector
     outputJson = StateProcessor.processResultPath(input, output, stateDefinition.ResultPath);
+    this.logger.debug(`TaskExecutor - processOutput2 - ${outputJson}`);
     outputJson = StateProcessor.processOutputPath(outputJson, stateDefinition.OutputPath);
 
     return outputJson;
@@ -130,25 +146,5 @@ export class TaskExecutor extends StateTypeExecutor {
     }
 
     return filePathResolved;
-  }
-
-  private injectEnvVarsLambdaSpecific(lambdaEnv: Record<string, string> | undefined): void {
-    if (!lambdaEnv) {
-      return;
-    }
-
-    Object.entries(lambdaEnv).forEach(([key, value]) => {
-      process.env[key] = value;
-    });
-  }
-
-  private removeEnvVarsLambdaSpecific(lambdaEnv: Record<string, string> | undefined): void {
-    if (!lambdaEnv) {
-      return;
-    }
-
-    Object.keys(lambdaEnv).forEach((key) => {
-      delete process.env[key];
-    });
   }
 }

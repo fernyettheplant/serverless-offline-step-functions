@@ -13,6 +13,7 @@ Serverless Offline Plugin to Support Step Functions for Local Development.
 
 - Fully Written in TypeScript
 - Promise based (no process spawn)
+- Completely based on AWS Docs
 
 ## Sponsor
 
@@ -60,23 +61,23 @@ If your project uses `serverless-webpack` to compile/transpile your serverless a
 ```yml
 plugins:
   - serverless-webpack # Defined Before
-  - serverless-step-functions
+  - serverless-step-functions # Defined Before
   - '@fernthedev/serverless-offline-step-functions'
   - serverless-offline
 ```
 
 ## State Types Supported
 
-| States         | Notes                                                                        |
-| -------------- | ---------------------------------------------------------------------------- |
-| **_Task_**     | Retry/Catch now supported!, `Timeout` and `Heartbeat` are not supported yet. |
-| **_Choice_**   | ✅                                                                           |
-| **_Wait_**     | ✅                                                                           |
-| **_Parallel_** | Not Supported at all yet.                                                    |
-| **_Pass_**     | ✅                                                                           |
-| **_Fail_**     | ✅                                                                           |
-| **_Succeed_**  | ✅                                                                           |
-| **_Map_**      | Not Supported at all yet.                                                    |
+| States         | Notes                                                                              |
+| -------------- | ---------------------------------------------------------------------------------- |
+| **_Task_**     | Basic Retry/Catch now supported!, `Timeout` and `Heartbeat` are not supported yet. |
+| **_Choice_**   | ✅                                                                                 |
+| **_Wait_**     | ✅                                                                                 |
+| **_Parallel_** | Not Supported at all yet.                                                          |
+| **_Pass_**     | ✅                                                                                 |
+| **_Fail_**     | ✅                                                                                 |
+| **_Succeed_**  | ✅                                                                                 |
+| **_Map_**      | Not Supported at all yet.                                                          |
 
 ## Credits and inspiration
 

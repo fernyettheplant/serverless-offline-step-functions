@@ -16,4 +16,5 @@ export enum StateType {
   // Adds branching logic to the state machine
   Choice = 'Choice',
   Parallel = 'Parallel',
+  Map = 'Map',
 }

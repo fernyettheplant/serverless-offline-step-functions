@@ -5,18 +5,10 @@ import { StateProcessor } from '../../StateProcessor';
 
 import type { WaitStateDefinition } from '../../types/State';
 import type { StateExecutorOutput } from '../../types/StateExecutorOutput';
-import { Logger } from '../../utils/Logger';
 import { validateTimestamp } from '../../utils/validateTimestamp';
 import { StateTypeExecutor } from '../StateTypeExecutor';
 
 export class WaitExecutor extends StateTypeExecutor {
-  private readonly logger: Logger;
-
-  constructor() {
-    super();
-    this.logger = Logger.getInstance();
-  }
-
   public async execute(
     context: Context,
     definition: WaitStateDefinition,

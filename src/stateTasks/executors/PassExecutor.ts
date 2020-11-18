@@ -2,17 +2,9 @@ import type { StateExecutorOutput } from '../../types/StateExecutorOutput';
 import type { PassStateDefinition } from '../../types/State';
 import { StateProcessor } from '../../StateProcessor';
 import { StateTypeExecutor } from '../StateTypeExecutor';
-import { Logger } from '../../utils/Logger';
 import { Context } from '../../Context/Context';
 
 export class PassExecutor extends StateTypeExecutor {
-  private readonly logger: Logger;
-
-  constructor() {
-    super();
-    this.logger = Logger.getInstance();
-  }
-
   public execute(
     context: Context,
     definition: PassStateDefinition,

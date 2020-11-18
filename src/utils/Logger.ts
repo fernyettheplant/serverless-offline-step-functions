@@ -17,6 +17,13 @@ export class Logger {
     consola.success(`${this.logPrefix} ${chalk.greenBright(message)}`);
   }
 
+  public debug(message: string): void {
+    // TODO: Get from config, or default to false
+    if (false) {
+      consola.log(`${this.logPrefix} ${chalk.greenBright(message)}`);
+    }
+  }
+
   public log(message: string): void {
     consola.log(`${this.logPrefix} ${chalk.blueBright(message)}`);
   }

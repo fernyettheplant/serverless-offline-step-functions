@@ -1,9 +1,12 @@
+import { Context } from '../Context/Context';
+import { Logger } from '../utils/Logger';
 import { TaskRetryRule } from './State';
 import { StatesErrors } from './StatesErrors';
 
 export class Retrier {
   private currentNumberOfRetries = 0;
   private currentIntervalSeconds: number;
+  private logger: Logger;
 
   private constructor(
     private readonly _ErrorEquals: StatesErrors[],
@@ -12,6 +15,7 @@ export class Retrier {
     private readonly _BackoffRate: number = 2.0,
   ) {
     this.currentIntervalSeconds = _IntervalSeconds;
+    this.logger = Logger.getInstance();
   }
 
   public static create(taskRetryRule: TaskRetryRule): Retrier {
@@ -23,19 +27,25 @@ export class Retrier {
     );
   }
 
-  async retry(fn: () => any): Promise<any> {
+  async retry(fn: () => any, context: Context): Promise<any> {
     let output: unknown;
     try {
       output = await fn();
       return output;
     } catch (error) {
+      this.logger.error(
+        `Caught an error in Retrier for ${context.StateMachine.Name}-${context.State.Name}: ${error.stack}`,
+      );
       if (this.currentNumberOfRetries < this._MaxAttempts) {
         this.currentNumberOfRetries++;
+        this.logger.log(
+          `Retrying ${context.StateMachine.Name}-${context.State.Name}, attempt #${this.currentNumberOfRetries}`,
+        );
         return await new Promise((resolve, reject) => {
           setTimeout(async () => {
             this.currentIntervalSeconds = this.currentIntervalSeconds * this._BackoffRate;
             try {
-              const output = await this.retry(fn);
+              const output = await this.retry(fn, context);
               return resolve(output);
             } catch (error) {
               return reject(error);
@@ -43,6 +53,9 @@ export class Retrier {
           }, this.currentIntervalSeconds * 1000);
         });
       } else {
+        this.logger.log(
+          `Already retried MaxAttemps of ${this.currentNumberOfRetries} for ${context.StateMachine.Name}-${context.State.Name}`,
+        );
         throw error;
       }
     }

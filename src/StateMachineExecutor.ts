@@ -7,6 +7,7 @@ import { Context } from './Context/Context';
 import { StateContext } from './Context/StateContext';
 import { ContextToJson } from './Context/ContextToJson';
 import { StateMachine } from './StateMachine/StateMachine';
+import { isJsonByteLengthValid } from './utils/isJsonByteLengthValid';
 
 export type ExecuteType = () => Promise<ExecuteType | string | void>;
 
@@ -36,6 +37,16 @@ export class StateMachineExecutor {
 
     try {
       stateExecutorOutput = await typeExecutor.execute(this.context, stateDefinition, inputJson);
+
+      this.logger.debug(`StateMachineExecutor - execute1 - ${stateExecutorOutput}`);
+
+      if (isJsonByteLengthValid(stateExecutorOutput.json)) {
+        this.logger.error(
+          `The state/task '${this.context.State.Name}' returned a result with a size exceeding the maximum number of bytes service limit.`,
+        );
+
+        throw new Error('Return result must have size less than or equal to 262144 bytes in UTF-8 encoding');
+      }
 
       if (stateExecutorOutput.End) {
         this.logger.log(`[${this.context.State.Name}] State Machine Ended`);

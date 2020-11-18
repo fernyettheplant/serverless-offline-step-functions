@@ -1,3 +1,4 @@
+import { Context } from '../Context/Context';
 import { Retrier } from './Retrier';
 import { TaskRetryRule } from './State';
 import { StatesErrors } from './StatesErrors';
@@ -23,12 +24,11 @@ export class Retriers {
   }
 
   // TODO: Add the number of retries to the context object
-  async retry(fn: () => any): Promise<any> {
-    // TODO: Add timeout error catching
+  async retry(fn: () => any, context: Context): Promise<any> {
     const retrier = this.getRetrierBasedOn(StatesErrors.TaskFailed);
 
     if (retrier) {
-      return await retrier.retry(fn);
+      return await retrier.retry(fn, context);
     } else {
       return fn();
     }
