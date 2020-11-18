@@ -1,4 +1,3 @@
-import type { StateMachine } from './types/StateMachine';
 import type { StateDefinition, TaskStateDefinition } from './types/State';
 
 import { StateTypeExecutorFactory } from './stateTasks/StateTypeExecutorFactory';
@@ -7,6 +6,7 @@ import { Logger } from './utils/Logger';
 import { Context } from './Context/Context';
 import { StateContext } from './Context/StateContext';
 import { ContextToJson } from './Context/ContextToJson';
+import { StateMachine } from './StateMachine/StateMachine';
 
 export type ExecuteType = () => Promise<ExecuteType | string | void>;
 

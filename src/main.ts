@@ -8,6 +8,8 @@ import { StepFunctionSimulatorServer } from './StepFunctionSimulatorServer';
 import { StateInfoHandler } from './StateInfoHandler';
 import { Logger } from './utils/Logger';
 import { TaskStateDefinition } from './types/State';
+import { StateMachinesDescription } from './types/StateMachineDescription';
+import { StateMachines } from './StateMachine/StateMachines';
 
 class ServerlessOfflineStepFunctionsPlugin {
   public hooks?: ServerlessOfflineHooks;
@@ -55,13 +57,20 @@ class ServerlessOfflineStepFunctionsPlugin {
   private start() {
     this.injectGlobalEnvVars();
     // Get Handler and Path of the Local Functions
-    const definedStateMachines = this.serverless.service.initialServerlessConfig?.stepFunctions?.stateMachines;
+    const definedStateMachines: StateMachinesDescription = this.serverless.service.initialServerlessConfig
+      ?.stepFunctions?.stateMachines;
 
-    this.resolveHandlers(definedStateMachines);
+    const stateMachines = StateMachines.create(definedStateMachines);
+
+    if (!stateMachines) {
+      throw new Error('No step machines defined');
+    }
+
+    this.resolveHandlers(stateMachines);
 
     this.stepFunctionSimulatorServer = new StepFunctionSimulatorServer({
       port: this.options?.port || 8014,
-      stateMachines: definedStateMachines,
+      stateMachines,
     });
   }
 
@@ -84,14 +93,13 @@ class ServerlessOfflineStepFunctionsPlugin {
     };
   }
 
-  private resolveHandlers(definedStateMachines: any) {
+  private resolveHandlers(definedStateMachines: StateMachines) {
     const definedFunctions = this.serverless.service.initialServerlessConfig.functions;
     const statesInfoHandler = StateInfoHandler.getInstance();
-    const definedStateMachinesArr = Object.entries(definedStateMachines);
 
     // Per StateMachine
-    for (const [stateMachineName, stateMachineOptions] of definedStateMachinesArr) {
-      const states = Object.entries((stateMachineOptions as any).definition.States);
+    for (const stateMachine of definedStateMachines.stateMachines) {
+      const states = Object.entries(stateMachine.definition.States);
 
       // Per State in the StateMachine
       for (const [stateName, stateOptions] of states) {
@@ -130,7 +138,7 @@ class ServerlessOfflineStepFunctionsPlugin {
         const environment: Record<string, string> | undefined = this.serverless.service.initialServerlessConfig
           ?.functions[functionName]?.environment;
 
-        statesInfoHandler.setStateInfo(stateMachineName, stateName, handlerPath, handlerName, environment);
+        statesInfoHandler.setStateInfo(stateMachine.name, stateName, handlerPath, handlerName, environment);
       }
     }
   }

@@ -83,7 +83,12 @@ export class StateProcessor {
     return JSON.stringify(input);
   }
 
-  public static processOutputPath(json: string, outputPath?: string): string {
+  public static processOutputPath(json?: string, outputPath?: string): string {
+    // TODO: check if AWS throws or skips this
+    if (!json) {
+      throw new Error('Output JSON of lambda was undefined');
+    }
+
     const result = JSONPath({
       path: outputPath || '$',
       json: JSON.parse(json),

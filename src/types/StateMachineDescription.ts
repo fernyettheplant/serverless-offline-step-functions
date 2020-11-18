@@ -7,12 +7,12 @@ export type StateMachineDefinition = {
   };
 };
 
-export type StateMachine = {
-  name: string;
+export type StateMachineDescription = {
+  name?: string;
   definition: StateMachineDefinition;
 };
 
 // TODO: Temporal, move to Serverless type
-export type StateMachines = {
-  [key: string]: StateMachine;
+export type StateMachinesDescription = {
+  [key: string]: StateMachineDescription;
 };

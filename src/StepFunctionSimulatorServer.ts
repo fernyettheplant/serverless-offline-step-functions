@@ -2,7 +2,6 @@ import { createHttpTerminator, HttpTerminator } from 'http-terminator';
 import express, { Express, Request, Response } from 'express';
 import type { StepFunctions } from 'aws-sdk';
 
-import type { StateMachines } from './types/StateMachine';
 import type { StateDefinition } from './types/State';
 import { ExecuteType, StateMachineExecutor } from './StateMachineExecutor';
 import { Logger } from './utils/Logger';
@@ -10,6 +9,7 @@ import { StateMachineContext } from './Context/StateMachineContext';
 import { ExecutionContext } from './Context/ExecutionContext';
 import { Context } from './Context/Context';
 import { StateContext } from './Context/StateContext';
+import { StateMachines } from './StateMachine/StateMachines';
 
 export type StepFunctionSimulatorServerOptions = {
   port: number;
@@ -21,11 +21,13 @@ export class StepFunctionSimulatorServer {
   private httpTerminator?: HttpTerminator;
   // TODO: Move State Machines and type it
   private options: StepFunctionSimulatorServerOptions;
+  private stateMachines: StateMachines;
   private readonly logger: Logger;
   private pendingStateMachineExecutions: { [key: string]: ExecuteType } = {};
 
   constructor(options: StepFunctionSimulatorServerOptions) {
     this.options = options;
+    this.stateMachines = this.options.stateMachines;
     this.logger = Logger.getInstance();
     this.express = express();
     this.setupMiddlewares();
@@ -97,10 +99,12 @@ export class StepFunctionSimulatorServer {
 
     const executionInput: StepFunctions.Types.StartExecutionInput = req.body;
     const stateMachineContext = StateMachineContext.create(executionInput.stateMachineArn);
-    const stateMachineToExecute = this.options.stateMachines[stateMachineContext.Name];
+    const stateMachineToExecute = this.stateMachines.getStateMachineBy(stateMachineContext.Name);
 
     if (!stateMachineToExecute) {
-      return res.status(500);
+      const message = `No state machine with name ${stateMachineContext.Name} exists in the serverless`;
+      this.logger.error(message);
+      return res.status(200).send({ message });
     }
 
     const executionContext = ExecutionContext.create(stateMachineContext, executionInput.input);

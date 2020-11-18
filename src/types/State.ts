@@ -1,4 +1,4 @@
-import type { StateMachineDefinition } from './StateMachine';
+import type { StateMachineDefinition } from './StateMachineDescription';
 import { StateType } from '../stateTasks/StateType';
 import { StatesErrors } from './StatesErrors';
 
