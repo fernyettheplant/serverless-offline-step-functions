@@ -10,6 +10,8 @@ import { Logger } from './utils/Logger';
 import { MapStateDefinition, StateDefinition, TaskStateDefinition } from './types/State';
 import { StateType } from './stateTasks/StateType';
 import { EnvVarResolver } from './utils/EnvVarResolver';
+import { StateMachines } from './StateMachine/StateMachines';
+import { StateMachinesDescription } from './types/StateMachineDescription';
 
 class ServerlessOfflineStepFunctionsPlugin {
   public hooks?: ServerlessOfflineHooks;
@@ -62,13 +64,19 @@ class ServerlessOfflineStepFunctionsPlugin {
     envVarResolver.injectGlobalEnvVars();
 
     // Get Handler and Path of the Local Functions
-    const definedStateMachines = this.serverless.service.initialServerlessConfig?.stepFunctions?.stateMachines;
+    const definedStateMachines: StateMachinesDescription = this.serverless.service.initialServerlessConfig
+      ?.stepFunctions?.stateMachines;
 
-    this.resolveHandlers(definedStateMachines);
+    const stateMachines = StateMachines.create(definedStateMachines);
+
+    if (!stateMachines) {
+      throw new Error('No step machines defined');
+    }
+    this.resolveHandlers(stateMachines);
 
     this.stepFunctionSimulatorServer = new StepFunctionSimulatorServer({
       port: this.options?.port || 8014,
-      stateMachines: definedStateMachines,
+      stateMachines,
     });
   }
 
@@ -149,14 +157,12 @@ class ServerlessOfflineStepFunctionsPlugin {
     }
   }
 
-  private resolveHandlers(definedStateMachines: any) {
-    const definedStateMachinesArr = Object.entries(definedStateMachines);
-
+  private resolveHandlers(definedStateMachines: StateMachines) {
     // Per StateMachine
-    for (const [stateMachineName, stateMachineOptions] of definedStateMachinesArr) {
-      const states: [string, StateDefinition][] = Object.entries((stateMachineOptions as any).definition.States);
+    for (const stateMachine of definedStateMachines.stateMachines) {
+      const states: [string, StateDefinition][] = Object.entries(stateMachine.definition.States);
 
-      this.setStateInfo(states, stateMachineName);
+      this.setStateInfo(states, stateMachine.name);
     }
   }
 }
