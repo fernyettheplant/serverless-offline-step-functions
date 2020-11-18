@@ -40,7 +40,7 @@ export class StateMachineExecutor {
 
       this.logger.debug(`StateMachineExecutor - execute1 - ${stateExecutorOutput}`);
 
-      if (isJsonByteLengthValid(stateExecutorOutput.json)) {
+      if (!isJsonByteLengthValid(stateExecutorOutput.json)) {
         this.logger.error(
           `The state/task '${this.context.State.Name}' returned a result with a size exceeding the maximum number of bytes service limit.`,
         );
