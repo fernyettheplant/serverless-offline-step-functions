@@ -1,12 +1,9 @@
-import { Context } from '../Context/Context';
-import { Logger } from '../utils/Logger';
 import { TaskRetryRule } from './State';
 import { StatesErrors } from './StatesErrors';
 
 export class Retrier {
-  private currentNumberOfRetries = 0;
-  private currentIntervalSeconds: number;
-  private logger: Logger;
+  private _currentNumberOfRetries = 0;
+  private _currentIntervalSeconds: number;
 
   private constructor(
     private readonly _ErrorEquals: StatesErrors[],
@@ -14,8 +11,7 @@ export class Retrier {
     private readonly _MaxAttempts: number = 3,
     private readonly _BackoffRate: number = 2.0,
   ) {
-    this.currentIntervalSeconds = _IntervalSeconds;
-    this.logger = Logger.getInstance();
+    this._currentIntervalSeconds = _IntervalSeconds;
   }
 
   public static create(taskRetryRule: TaskRetryRule): Retrier {
@@ -27,39 +23,33 @@ export class Retrier {
     );
   }
 
-  async retry(fn: () => any, context: Context): Promise<any> {
-    let output: unknown;
-    try {
-      output = await fn();
-      return output;
-    } catch (error) {
-      this.logger.error(
-        `Caught an error in Retrier for ${context.StateMachine.Name}-${context.State.Name}: ${error.stack}`,
-      );
-      if (this.currentNumberOfRetries < this._MaxAttempts) {
-        this.currentNumberOfRetries++;
-        this.logger.log(
-          `Retrying ${context.StateMachine.Name}-${context.State.Name}, attempt #${this.currentNumberOfRetries}`,
-        );
-        return await new Promise((resolve, reject) => {
-          setTimeout(async () => {
-            this.currentIntervalSeconds = this.currentIntervalSeconds * this._BackoffRate;
-            try {
-              const output = await this.retry(fn, context);
-              return resolve(output);
-            } catch (error) {
-              return reject(error);
-            }
-          }, this.currentIntervalSeconds * 1000);
-        });
-      } else {
-        this.logger.log(
-          `Already retried MaxAttemps of ${this.currentNumberOfRetries} for ${context.StateMachine.Name}-${context.State.Name}`,
-        );
-        throw error;
-      }
-    }
+  public shouldRetry(): boolean {
+    return this._currentNumberOfRetries < this._MaxAttempts;
   }
+  public retried(): void {
+    this._currentNumberOfRetries = this._currentNumberOfRetries + 1;
+    this._currentIntervalSeconds = this._currentIntervalSeconds * this._BackoffRate;
+  }
+
+  get currentNumberOfRetries(): number {
+    return this._currentNumberOfRetries;
+  }
+  get currentIntervalSeconds(): number {
+    return this._currentIntervalSeconds;
+  }
+
+  // async retry(fn: () => any, context: Context): Promise<any> {
+  //   return await new Promise((resolve, reject) => {
+  //     setTimeout(async () => {
+  //       try {
+  //         const output = await fn();
+  //         return resolve(output);
+  //       } catch (error) {
+  //         return reject(error);
+  //       }
+  //     }, this._currentIntervalSeconds * 1000);
+  //   });
+  // }
 
   get ErrorEquals(): StatesErrors[] {
     return this._ErrorEquals;

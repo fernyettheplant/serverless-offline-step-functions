@@ -35,8 +35,8 @@ export class TaskExecutor extends StateTypeExecutor {
     let output: any;
     try {
       if (stateDefinition.Retry) {
-        const retrier = Retriers.create(stateDefinition.Retry);
-        output = await retrier.retry(() => functionLambda[stateInfo.handlerName](input, context), context);
+        const retriers = Retriers.create(stateDefinition.Retry);
+        output = await retriers.retry(() => functionLambda[stateInfo.handlerName](input, context), context);
       } else {
         output = await functionLambda[stateInfo.handlerName](input, context);
       }
