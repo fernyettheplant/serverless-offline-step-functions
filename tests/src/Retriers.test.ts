@@ -1,9 +1,9 @@
 import { Context } from '../../src/Context/Context';
-import { Retrier } from '../../src/types/Retrier';
+import { Retriers } from '../../src/types/Retriers';
 import { StatesErrors } from '../../src/types/StatesErrors';
 import { Logger } from '../../src/utils/Logger';
 
-describe('Retrier', () => {
+describe('Retriers', () => {
   const context = ({
     Task: { Token: 'OneTaskToken' },
     Execution: { Id: 'MyExecutionId' },
@@ -25,17 +25,17 @@ describe('Retrier', () => {
 
   describe('when the function succeeds', () => {
     it('should call it once', async () => {
-      const retrier = Retrier.create({ ErrorEquals: [StatesErrors.TaskFailed] });
+      const retriers = Retriers.create([{ ErrorEquals: [StatesErrors.TaskFailed] }]);
       const retriedFunction = jest.fn();
-      await retrier.retry(retriedFunction, context);
+      await retriers.retry(retriedFunction, context);
       expect(retriedFunction).toHaveBeenCalledTimes(1);
     });
 
     describe('when the function is async', () => {
       it('should call it once', async () => {
-        const retrier = Retrier.create({ ErrorEquals: [StatesErrors.TaskFailed] });
+        const retriers = Retriers.create([{ ErrorEquals: [StatesErrors.TaskFailed] }]);
         const retriedFunction = jest.fn().mockImplementation(() => Promise.resolve);
-        await retrier.retry(retriedFunction, context);
+        await retriers.retry(retriedFunction, context);
         expect(retriedFunction).toHaveBeenCalledTimes(1);
       });
     });
@@ -46,12 +46,12 @@ describe('Retrier', () => {
     it('should call it 4 times', (done) => {
       expect.assertions(2);
 
-      const retrier = Retrier.create({ ErrorEquals: [StatesErrors.TaskFailed] });
+      const retriers = Retriers.create([{ ErrorEquals: [StatesErrors.TaskFailed] }]);
       const retriedFunction = jest.fn().mockImplementation(() => {
         throw new Error('MyError');
       });
 
-      retrier.retry(retriedFunction, context).catch((error) => {
+      retriers.retry(retriedFunction, context).catch((error) => {
         expect(error.message).toEqual('MyError');
         expect(retriedFunction).toHaveBeenCalledTimes(4);
         done();
@@ -63,12 +63,12 @@ describe('Retrier', () => {
     it('should call it 6 times', (done) => {
       expect.assertions(2);
 
-      const retrier = Retrier.create({ ErrorEquals: [StatesErrors.TaskFailed], MaxAttempts: 5 });
+      const retriers = Retriers.create([{ ErrorEquals: [StatesErrors.TaskFailed], MaxAttempts: 5 }]);
       const retriedFunction = jest.fn().mockImplementation(() => {
         throw new Error('MyError');
       });
 
-      retrier.retry(retriedFunction, context).catch((error) => {
+      retriers.retry(retriedFunction, context).catch((error) => {
         expect(error.message).toEqual('MyError');
         expect(retriedFunction).toHaveBeenCalledTimes(6);
         done();
@@ -79,18 +79,20 @@ describe('Retrier', () => {
     it('should call it with correct interval', (done) => {
       expect.assertions(5);
 
-      const retrier = Retrier.create({
-        ErrorEquals: [StatesErrors.TaskFailed],
-        MaxAttempts: 5,
-        BackoffRate: 2.0,
-        IntervalSeconds: 5,
-      });
+      const retriers = Retriers.create([
+        {
+          ErrorEquals: [StatesErrors.TaskFailed],
+          MaxAttempts: 5,
+          BackoffRate: 2.0,
+          IntervalSeconds: 5,
+        },
+      ]);
 
       const retriedFunction = jest.fn().mockImplementation(() => {
         throw new Error('MyError');
       });
 
-      retrier.retry(retriedFunction, context).catch(() => {
+      retriers.retry(retriedFunction, context).catch(() => {
         expect(setTimeout).toHaveBeenNthCalledWith(1, expect.any(Function), 5 * 1000);
         expect(setTimeout).toHaveBeenNthCalledWith(2, expect.any(Function), 10 * 1000);
         expect(setTimeout).toHaveBeenNthCalledWith(3, expect.any(Function), 20 * 1000);
