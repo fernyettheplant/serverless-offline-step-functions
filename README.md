@@ -23,6 +23,7 @@ If the plugin is being useful in your company and/or project and want to keep th
 
 ## Requirements
 
+- [serverless](https://github.com/serverless/serverless)
 - [serverless-offline](https://github.com/dherault/serverless-offline)
 - [serverless-step-functions plugin](https://github.com/serverless-operations/serverless-step-functions)
 - [serverless-webpack (optional)](https://github.com/serverless-heaven/serverless-webpack)
@@ -67,16 +68,16 @@ plugins:
 
 ## State Types Supported
 
-| States | Notes |
-| ------ | ------ |
-| ***Task*** | Retry/Catch now supported!, `Timeout` and `Heartbeat` are not supported yet. |
-| ***Choice*** | ✅ |
-| ***Wait***  | ✅ |
-| ***Parallel*** | Not Supported at all yet. |
-| ***Pass*** | ✅ |
-| ***Fail***| ✅ |
-| ***Succeed***|✅|
-| ***Map*** | Basic Support ✅ |
+| States         | Notes                                                                              |
+| -------------- | ---------------------------------------------------------------------------------- |
+| **_Task_**     | Basic Retry/Catch now supported!, `Timeout` and `Heartbeat` are not supported yet. |
+| **_Choice_**   | ✅                                                                                 |
+| **_Wait_**     | ✅                                                                                 |
+| **_Parallel_** | Not Supported at all yet.                                                          |
+| **_Pass_**     | ✅                                                                                 |
+| **_Fail_**     | ✅                                                                                 |
+| **_Succeed_**  | ✅                                                                                 |
+| **_Map_**      | Not Supported at all yet.                                                          |
 
 ## Credits and inspiration
 

@@ -4,9 +4,10 @@ import type { MapStateDefinition } from '../../types/State';
 
 import { Context } from '../../Context/Context';
 import { ExecuteType, StateMachineExecutor } from '../../StateMachineExecutor';
-import { StateMachine } from '../../types/StateMachine';
 import { StateContext } from '../../Context/StateContext';
 import { StateProcessor } from '../../StateProcessor';
+import { StateMachineDescription } from '../../types/StateMachineDescription';
+import { StateMachine } from '../../StateMachine/StateMachine';
 
 export class MapExecutor extends StateTypeExecutor {
   private pendingStateMachineExecutions: { [key: string]: ExecuteType } = {};
@@ -16,10 +17,12 @@ export class MapExecutor extends StateTypeExecutor {
     stateDefinition: MapStateDefinition,
     inputJson: string | undefined,
   ): Promise<StateExecutorOutput> {
-    const stateMachine: StateMachine = {
-      name: stateDefinition.Comment || '',
+    const stateMachineDescription: StateMachineDescription = {
+      name: stateDefinition.Comment,
       definition: stateDefinition.Iterator,
     };
+
+    const stateMachine = StateMachine.create(stateMachineDescription.name || '', stateMachineDescription);
     // TODO: Extract common logic from StepFunctionSimulatorServer
     // TODO: Make nested Maps work
     // TODO: Make the waitForTaskToken work in Map & nested maps

@@ -1,4 +1,3 @@
-import type { StateMachine } from './types/StateMachine';
 import type { StateDefinition, TaskStateDefinition } from './types/State';
 
 import { StateTypeExecutorFactory } from './stateTasks/StateTypeExecutorFactory';
@@ -7,6 +6,7 @@ import { Logger } from './utils/Logger';
 import { Context } from './Context/Context';
 import { StateContext } from './Context/StateContext';
 import { ContextToJson } from './Context/ContextToJson';
+import { StateMachine } from './StateMachine/StateMachine';
 import { isJsonByteLengthValid } from './utils/isJsonByteLengthValid';
 
 export type ExecuteType = () => Promise<ExecuteType | string | void>;
@@ -40,7 +40,7 @@ export class StateMachineExecutor {
 
       this.logger.debug(`StateMachineExecutor - execute1 - ${stateExecutorOutput}`);
 
-      if (isJsonByteLengthValid(stateExecutorOutput.json)) {
+      if (!isJsonByteLengthValid(stateExecutorOutput.json)) {
         this.logger.error(
           `The state/task '${this.context.State.Name}' returned a result with a size exceeding the maximum number of bytes service limit.`,
         );
