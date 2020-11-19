@@ -38,19 +38,6 @@ export class Retrier {
     return this._currentIntervalSeconds;
   }
 
-  // async retry(fn: () => any, context: Context): Promise<any> {
-  //   return await new Promise((resolve, reject) => {
-  //     setTimeout(async () => {
-  //       try {
-  //         const output = await fn();
-  //         return resolve(output);
-  //       } catch (error) {
-  //         return reject(error);
-  //       }
-  //     }, this._currentIntervalSeconds * 1000);
-  //   });
-  // }
-
   get ErrorEquals(): StatesErrors[] {
     return this._ErrorEquals;
   }

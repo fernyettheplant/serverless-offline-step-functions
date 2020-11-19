@@ -45,7 +45,7 @@ export class Retriers {
 
       if (retrier && retrier.shouldRetry()) {
         this.logger.log(
-          `Retrying ${context.StateMachine.Name}-${context.State.Name}, retry #${retrier.currentNumberOfRetries + 1}`,
+          `Retrying ${context.StateMachine.Name}-${context.State.Name}, retry #${retrier.currentNumberOfRetries}`,
         );
 
         const interval = retrier.currentIntervalSeconds;
@@ -61,9 +61,9 @@ export class Retriers {
             }
           }, interval * 1000);
         });
-      } else {
-        return fn();
       }
+
+      throw error;
     }
   }
 }
