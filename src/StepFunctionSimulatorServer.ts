@@ -79,9 +79,9 @@ export class StepFunctionSimulatorServer {
 
   private async resolveStateMachine(req: Request, res: Response) {
     this.logger.log(`Got request for ${req.method} ${req.url}`);
-    if (req.body.taskToken) {
-      // Resume step function
 
+    // Resume step function
+    if (req.body.taskToken) {
       if (this.isSendTaskSuccess(req.body)) {
         if (typeof this.pendingStateMachineExecutions[req.body.taskToken] !== 'function') {
           this.logger.log(`No step function to resume with taskToken '${req.body.taskToken}.'`);
@@ -102,9 +102,9 @@ export class StepFunctionSimulatorServer {
     const stateMachineToExecute = this.stateMachines.getStateMachineBy(stateMachineContext.Name);
 
     if (!stateMachineToExecute) {
-      const message = `No state machine with name ${stateMachineContext.Name} exists in the serverless`;
-      this.logger.error(message);
-      return res.status(200).send({ message });
+      const errorMessage = `No stateMachineToExecute for name "${stateMachineContext.Name}"`;
+      this.logger.error(errorMessage);
+      return res.status(404).send();
     }
 
     const executionContext = ExecutionContext.create(stateMachineContext, executionInput.input);
