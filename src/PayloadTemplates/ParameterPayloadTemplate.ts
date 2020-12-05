@@ -39,6 +39,13 @@ export class ParameterPayloadTemplate extends PayloadTemplate {
         Logger.getInstance().error(message);
         throw new Error(message);
       }
+
+      try {
+        // If the result is strigified JSON, we need to parse it
+        result[0] = JSON.parse(result[0]);
+      } catch (error) {
+        // If it fails, we continue with whatever was the result (probably a simple string)
+      }
     } else {
       result = JSONPath({
         path: path === undefined ? '$' : path,
