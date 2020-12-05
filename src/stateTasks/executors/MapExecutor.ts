@@ -3,7 +3,7 @@ import type { StateExecutorOutput } from '../../types/StateExecutorOutput';
 import type { MapStateDefinition } from '../../types/State';
 
 import { Context } from '../../Context/Context';
-import { ExecuteType, StateMachineExecutor } from '../../StateMachineExecutor';
+import { ExecuteType, StateMachineExecutor, StateMachineExecutorError } from '../../StateMachineExecutor';
 import { StateContext } from '../../Context/StateContext';
 import { StateProcessor } from '../../StateProcessor';
 import { StateMachineDescription } from '../../types/StateMachineDescription';
@@ -53,7 +53,13 @@ export class MapExecutor extends StateTypeExecutor {
         const startAtState = stateDefinition.Iterator.States[stateDefinition.Iterator.StartAt];
 
         // TODO: Add the index so that everything we log can be followed more easily
-        output.push(await sme.execute(startAtState, JSON.stringify(value)));
+        const execution = await sme.execute(startAtState, JSON.stringify(value));
+
+        if (execution instanceof StateMachineExecutorError) {
+          throw execution.error;
+        }
+
+        output.push(execution);
       }),
     );
 
