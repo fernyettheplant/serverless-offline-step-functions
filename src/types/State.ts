@@ -106,7 +106,7 @@ type LambdaTaskStateParameters = {
 export type PayloadTemplateType = LambdaTaskStateParameters & Record<string, unknown>;
 
 export type TaskStateDefinition = CommonStateDefinition & {
-  Resource: string;
+  Resource?: string;
   Parameters?: PayloadTemplateType;
   ResultPath?: string;
   ResultSelector?: string;

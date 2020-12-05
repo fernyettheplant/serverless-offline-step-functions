@@ -9,7 +9,11 @@ import { ContextToJson } from './Context/ContextToJson';
 import { StateMachine } from './StateMachine/StateMachine';
 import { isJsonByteLengthValid } from './utils/isJsonByteLengthValid';
 
-export type ExecuteType = () => Promise<ExecuteType | string | void>;
+export type ExecuteType = () => Promise<ExecuteType | string | void | StateMachineExecutorError>;
+
+export class StateMachineExecutorError {
+  constructor(public readonly error: Error) {}
+}
 
 export class StateMachineExecutor {
   private readonly context: Context;
@@ -25,7 +29,7 @@ export class StateMachineExecutor {
   public async execute(
     stateDefinition: StateDefinition,
     inputJson: string | undefined,
-  ): Promise<ExecuteType | string | void> {
+  ): Promise<ExecuteType | string | void | StateMachineExecutorError> {
     this.logger.log(`* * * * * ${this.context.State.Name} * * * * *`);
     this.logger.log(`input: \n${inputJson ? JSON.stringify(JSON.parse(inputJson), null, 2) : 'undefined'}\n`);
     this.logger.log(`context: \n${JSON.stringify(ContextToJson(this.context), null, 2)}\n`);
@@ -77,6 +81,7 @@ export class StateMachineExecutor {
     } catch (error) {
       // TODO: Error Handling for State Errors including FailState. Must be done
       this.logger.error(error.stack);
+      return new StateMachineExecutorError(error);
     }
   }
 }

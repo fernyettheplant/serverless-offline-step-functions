@@ -41,7 +41,6 @@ export class TaskExecutor extends StateTypeExecutor {
         output = await functionLambda[stateInfo.handlerName](input, context);
       }
     } catch (error) {
-      this.logger.error(`Caught an error in Catcher: ${error.stack}`);
       this.envVarResolver.removeEnvVarsLambdaSpecific(stateInfo.environment);
 
       return this.dealWithError(stateDefinition, error, input);
@@ -75,6 +74,8 @@ export class TaskExecutor extends StateTypeExecutor {
       throw error;
     }
 
+    this.logger.error(`Caught an error in Catcher: ${error.stack}`);
+
     const catchers = Catchers.create(stateDefinition.Catch);
     const catcher = catchers.getCatcherBasedOn([StatesErrors.TaskFailed, StatesErrors.All]);
 
@@ -104,7 +105,11 @@ export class TaskExecutor extends StateTypeExecutor {
 
     let output = proccessedInputJson;
 
-    if (stateDefinition.Parameters && stateDefinition.Resource.endsWith('.waitForTaskToken')) {
+    if (
+      stateDefinition.Parameters &&
+      typeof stateDefinition.Resource === 'string' &&
+      stateDefinition.Resource.endsWith('.waitForTaskToken')
+    ) {
       output = StateProcessor.processWaitForTokenParameters(proccessedInputJson, stateDefinition.Parameters, context);
     } else {
       output = StateProcessor.processParameters(proccessedInputJson, stateDefinition.Parameters);
