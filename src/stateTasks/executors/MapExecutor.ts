@@ -8,6 +8,7 @@ import { StateContext } from '../../Context/StateContext';
 import { StateProcessor } from '../../StateProcessor';
 import { StateMachineDescription } from '../../types/StateMachineDescription';
 import { StateMachine } from '../../StateMachine/StateMachine';
+import { Logger } from '../../utils/Logger';
 
 export class MapExecutor extends StateTypeExecutor {
   private pendingStateMachineExecutions: { [key: string]: ExecuteType } = {};
@@ -33,18 +34,15 @@ export class MapExecutor extends StateTypeExecutor {
 
     const iterable = this.processInput(inputJson, stateDefinition, context);
 
-    if (!Array.isArray(iterable)) {
-      this.logger.error(
-        `Processed input is not an array with InputPath: ${stateDefinition.InputPath} and input: ${inputJson}`,
-      );
-      throw new Error('Input is not an array');
-    }
-
     type MyType = ExecuteType | string | void;
     const output: MyType[] = [];
     await Promise.all(
-      iterable.map(async (value: unknown) => {
+      iterable.map(async (value: unknown, index: number) => {
         const tempContext = context.clone();
+        tempContext.startMapItration(index, typeof value === 'string' ? value : JSON.stringify(value));
+
+        const iterationInput = StateProcessor.processParameters(inputJson, stateDefinition.Parameters, tempContext);
+
         const stateName = stateDefinition.Iterator.StartAt;
         const stateContext = StateContext.create(stateName);
         tempContext.transitionTo(stateContext);
@@ -53,7 +51,7 @@ export class MapExecutor extends StateTypeExecutor {
         const startAtState = stateDefinition.Iterator.States[stateDefinition.Iterator.StartAt];
 
         // TODO: Add the index so that everything we log can be followed more easily
-        const execution = await sme.execute(startAtState, JSON.stringify(value));
+        const execution = await sme.execute(startAtState, iterationInput);
 
         if (execution instanceof StateMachineExecutorError) {
           throw execution.error;
@@ -71,20 +69,33 @@ export class MapExecutor extends StateTypeExecutor {
   }
 
   // TODO: Extract to a common place for Map & Task executors
-  private processInput(json: string | undefined, stateDefinition: MapStateDefinition, context: Context): unknown {
+  private processInput(json: string | undefined, stateDefinition: MapStateDefinition, context: Context): unknown[] {
     this.logger.debug(`MapExecutor - processInput1 - ${json}`);
-    const proccessedInputJson = StateProcessor.processInputPath(json, stateDefinition.ItemsPath);
-    this.logger.debug(`MapExecutor - processInput2 - ${proccessedInputJson}`);
+    const proccessedInputJson = StateProcessor.processInputPath(json, stateDefinition.InputPath);
+    const proccessedItemsJson = StateProcessor.processItemsPath(proccessedInputJson, stateDefinition.ItemsPath);
 
-    // TODO: Implement Parameters
-
+    let processedItems: unknown;
     try {
-      return JSON.parse(proccessedInputJson);
+      processedItems = JSON.parse(proccessedItemsJson);
     } catch (error) {
       this.logger.error(
-        `MapExecutor.processInput: Could not parse JSON for state ${context.State.Name}: "${proccessedInputJson}"`,
+        `MapExecutor.processInput: Could not parse JSON for state ${context.State.Name}: "${proccessedItemsJson}"`,
       );
       throw error;
     }
+
+    if (!Array.isArray(processedItems)) {
+      this.logger.error(
+        'Processed input & items is not an array ' +
+          `with InputPath: ${stateDefinition.InputPath} & ItemsPaths: ${stateDefinition.ItemsPath} and input: ${json}`,
+      );
+      throw new Error('Input is not an array');
+    }
+
+    Logger.getInstance().debug('Finished processing Map input');
+    Logger.getInstance().debug(JSON.stringify(processedItems));
+    Logger.getInstance().debug(typeof processedItems[0]);
+
+    return processedItems;
   }
 }

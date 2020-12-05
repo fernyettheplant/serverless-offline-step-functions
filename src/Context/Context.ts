@@ -1,9 +1,12 @@
 import { ExecutionContext } from './ExecutionContext';
+import { MapContext } from './MapContext';
 import { StateContext } from './StateContext';
 import { StateMachineContext } from './StateMachineContext';
 import { TaskContext } from './TaskContext';
 
 export class Context {
+  private _mapContex?: MapContext;
+
   constructor(
     private readonly _executionContext: ExecutionContext,
     private readonly _stateMachineContext: StateMachineContext,
@@ -36,8 +39,16 @@ export class Context {
     return this._taskContext;
   }
 
+  get Map(): MapContext | undefined {
+    return this._mapContex;
+  }
+
   public clone(): Context {
     return new Context(this._executionContext, this._stateMachineContext, this._stateContext, this._taskContext);
+  }
+
+  public startMapItration(iterationIndex: number, iterationInputValue: string): void {
+    this._mapContex = MapContext.create(iterationIndex, iterationInputValue);
   }
 
   transitionTo(state: StateContext, task: TaskContext = TaskContext.create()): void {

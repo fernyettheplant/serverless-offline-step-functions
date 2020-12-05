@@ -3,6 +3,7 @@ export type ContextType = {
   State: StateContextType;
   StateMachine: StateMachineContextType;
   Task: TaskContextType;
+  Map?: MapContextType;
 };
 
 export type StateContextType = {
@@ -18,6 +19,13 @@ export type StateMachineContextType = {
 
 export type TaskContextType = {
   Token: string;
+};
+
+export type MapContextType = {
+  Item: {
+    Value: string;
+    Index: number;
+  };
 };
 
 export type ExecutionContextType = {

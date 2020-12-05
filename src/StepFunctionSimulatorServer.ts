@@ -111,6 +111,9 @@ export class StepFunctionSimulatorServer {
     const firstStateContext = StateContext.create(stateMachineToExecute.definition.StartAt);
     const context = Context.create(executionContext, stateMachineContext, firstStateContext);
 
+    this.logger.debug('State definitions:');
+    this.logger.debug(JSON.stringify(stateMachineToExecute.definition.States));
+
     const startAtState: StateDefinition = stateMachineToExecute.definition.States[firstStateContext.Name];
     const sme = new StateMachineExecutor(stateMachineToExecute, context);
 

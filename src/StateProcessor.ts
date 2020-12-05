@@ -8,6 +8,26 @@ import { Logger } from './utils/Logger';
 export class StateProcessor {
   protected static logger: Logger = Logger.getInstance();
 
+  public static processItemsPath(dataJson: string | undefined | null, itemsPath: string | null | undefined): string {
+    this.logger.debug(`StateProcessor - processItemsPath - ${dataJson}`);
+    if (itemsPath === null) {
+      return '[]';
+    }
+
+    const inputJson = dataJson || '{}';
+
+    const result = JSONPath({
+      path: itemsPath === undefined ? '$' : itemsPath,
+      json: JSON.parse(inputJson),
+    });
+
+    if (!result || result.length === 0) {
+      throw new Error(`Could not find itemsPath "${itemsPath}" in JSON "${dataJson}"`);
+    }
+
+    return JSON.stringify(result[0]);
+  }
+
   public static processInputPath(dataJson: string | undefined | null, inputPath: string | null | undefined): string {
     this.logger.debug(`StateProcessor - processInputPath - ${dataJson}`);
     if (inputPath === null) {
@@ -46,15 +66,20 @@ export class StateProcessor {
 
   public static processParameters(
     dataJson: string | undefined | null,
-    payloadTemplateInput?: PayloadTemplateType,
+    payloadTemplateInput: PayloadTemplateType | undefined,
+    context: Context,
   ): string {
+    this.logger.debug('Starting processParameters');
+    this.logger.debug(JSON.stringify(dataJson));
+    this.logger.debug(JSON.stringify(payloadTemplateInput));
+
     if (!payloadTemplateInput) {
       return dataJson || '{}';
     }
 
     const inputJson = dataJson || '{}';
 
-    const payloadTemplate = ParameterPayloadTemplate.create(payloadTemplateInput);
+    const payloadTemplate = ParameterPayloadTemplate.create(payloadTemplateInput, context);
 
     return JSON.stringify(payloadTemplate.process(inputJson));
   }
