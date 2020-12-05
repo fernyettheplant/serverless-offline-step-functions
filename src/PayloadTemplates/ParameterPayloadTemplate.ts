@@ -15,6 +15,17 @@ export class ParameterPayloadTemplate extends PayloadTemplate {
     return new ParameterPayloadTemplate(payload, context);
   }
 
+  private hasJsonStructure(str) {
+    if (typeof str !== 'string') return false;
+    try {
+      const result = JSON.parse(str);
+      const type = Object.prototype.toString.call(result);
+      return type === '[object Object]' || type === '[object Array]';
+    } catch (err) {
+      return false;
+    }
+  }
+
   protected processPathKey(key: string, path: unknown, inputJson: string): Record<string, unknown> {
     if (typeof path !== 'string') {
       throw new Error(
@@ -38,6 +49,10 @@ export class ParameterPayloadTemplate extends PayloadTemplate {
         const message = `Could not process key "${key}", with path "${path}" for json ${jsonContext}.`;
         Logger.getInstance().error(message);
         throw new Error(message);
+      }
+
+      if (this.hasJsonStructure(result[0])) {
+        result[0] = JSON.parse(result[0]);
       }
     } else {
       result = JSONPath({
