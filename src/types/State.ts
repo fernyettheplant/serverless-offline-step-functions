@@ -121,6 +121,7 @@ export type TaskStateDefinition = CommonStateDefinition & {
 export type MapStateDefinition = CommonStateDefinition & {
   Iterator: StateMachineDefinition;
   ItemsPath?: string;
+  Parameters?: PayloadTemplateType;
   MaxConcurrency?: number;
   ResultPath?: string;
   ResultSelector?: string;

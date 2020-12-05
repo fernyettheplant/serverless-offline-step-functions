@@ -100,6 +100,7 @@ export class TaskExecutor extends StateTypeExecutor {
     context: Context,
   ): StateExecutorOutput {
     this.logger.debug(`TaskExecutor - processInput1 - ${json}`);
+    this.logger.debug(JSON.stringify(stateDefinition));
     const proccessedInputJson = StateProcessor.processInputPath(json, stateDefinition.InputPath);
     this.logger.debug(`TaskExecutor - processInput2 - ${proccessedInputJson}`);
 
@@ -112,7 +113,7 @@ export class TaskExecutor extends StateTypeExecutor {
     ) {
       output = StateProcessor.processWaitForTokenParameters(proccessedInputJson, stateDefinition.Parameters, context);
     } else {
-      output = StateProcessor.processParameters(proccessedInputJson, stateDefinition.Parameters);
+      output = StateProcessor.processParameters(proccessedInputJson, stateDefinition.Parameters, context);
     }
 
     try {

@@ -179,7 +179,7 @@ describe('StateProcessor', () => {
       describe('When the Payload is undefined', () => {
         ['{}', '{"something1": "something2", "haha": 123}'].map((val, index) => {
           it(`should return nothing - ${index}`, () => {
-            const result = StateProcessor.processParameters(val);
+            const result = StateProcessor.processParameters(val, undefined, context);
 
             expect(result).toEqual(val);
           });
@@ -189,7 +189,7 @@ describe('StateProcessor', () => {
       describe('When the Payload is empty', () => {
         ['{}', '{"something1": "something2", "haha": 123}'].map((val, index) => {
           it(`should return nothing - ${index}`, () => {
-            const result = StateProcessor.processParameters(val, {});
+            const result = StateProcessor.processParameters(val, {}, context);
 
             expect(result).toEqual('{}');
           });
@@ -202,13 +202,17 @@ describe('StateProcessor', () => {
           { A: 'AElse', B: 123, C: { D: 'D' } },
         ].map((Payload, index) => {
           it(`should return stringified JSON - ${index}`, () => {
-            const result = StateProcessor.processParameters('', Payload);
+            const result = StateProcessor.processParameters('', Payload, context);
 
             expect(result).toEqual(JSON.stringify(Payload));
           });
 
           it(`should return stringified JSON - ${index}`, () => {
-            const result = StateProcessor.processParameters('{"something1": "something2", "haha": 123}', Payload);
+            const result = StateProcessor.processParameters(
+              '{"something1": "something2", "haha": 123}',
+              Payload,
+              context,
+            );
 
             expect(result).toEqual(JSON.stringify(Payload));
           });
@@ -217,9 +221,13 @@ describe('StateProcessor', () => {
 
       describe('When the Payload has a path at the root', () => {
         it(`should fill that path`, () => {
-          const result = StateProcessor.processParameters('{"something1": "something2", "haha": 123}', {
-            'Something.$': '$.haha',
-          });
+          const result = StateProcessor.processParameters(
+            '{"something1": "something2", "haha": 123}',
+            {
+              'Something.$': '$.haha',
+            },
+            context,
+          );
 
           expect(result).toEqual(
             JSON.stringify({
@@ -236,6 +244,7 @@ describe('StateProcessor', () => {
             {
               'Something.$': '$.foo.bar',
             },
+            context,
           );
 
           expect(result).toEqual(
@@ -255,6 +264,7 @@ describe('StateProcessor', () => {
                 'foo.$': '$.foo.bar',
               },
             },
+            context,
           );
 
           expect(result).toEqual(
@@ -265,6 +275,26 @@ describe('StateProcessor', () => {
             }),
           );
         });
+      });
+    });
+  });
+
+  describe('ItemsPath', () => {
+    describe('When the ItemsPaths is incorrect', () => {
+      it('should throw and error', () => {
+        expect(() =>
+          StateProcessor.processItemsPath('{"something1": "something2", "iterator": [1, 2] }', '$.items'),
+        ).toThrow('Could not find itemsPath "$.items" in JSON "{"something1": "something2", "iterator": [1, 2] }"');
+      });
+    });
+
+    describe('When the ItemsPaths is correct', () => {
+      it('should return the correct JSON', () => {
+        const result = StateProcessor.processItemsPath(
+          '{"something1": "something2", "iterator": [1, 2] }',
+          '$.iterator',
+        );
+        expect(result).toEqual(JSON.stringify([1, 2]));
       });
     });
   });
@@ -329,7 +359,7 @@ describe('StateProcessor', () => {
     describe('When the Payload is undefined', () => {
       ['{}', '{"something1": "something2", "haha": 123}'].map((val, index) => {
         it(`should return nothing - ${index}`, () => {
-          const result = StateProcessor.processParameters(val);
+          const result = StateProcessor.processParameters(val, undefined, context);
 
           expect(result).toEqual(val);
         });
@@ -339,7 +369,7 @@ describe('StateProcessor', () => {
     describe('When the Payload is empty', () => {
       ['{}', '{"something1": "something2", "haha": 123}'].map((val, index) => {
         it(`should return nothing - ${index}`, () => {
-          const result = StateProcessor.processParameters(val, {});
+          const result = StateProcessor.processParameters(val, {}, context);
 
           expect(result).toEqual('{}');
         });
@@ -352,13 +382,17 @@ describe('StateProcessor', () => {
         { A: 'AElse', B: 123, C: { D: 'D' } },
       ].map((Payload, index) => {
         it(`should return stringified JSON - ${index}`, () => {
-          const result = StateProcessor.processParameters('', Payload);
+          const result = StateProcessor.processParameters('', Payload, context);
 
           expect(result).toEqual(JSON.stringify(Payload));
         });
 
         it(`should return stringified JSON - ${index}`, () => {
-          const result = StateProcessor.processParameters('{"something1": "something2", "haha": 123}', Payload);
+          const result = StateProcessor.processParameters(
+            '{"something1": "something2", "haha": 123}',
+            Payload,
+            context,
+          );
 
           expect(result).toEqual(JSON.stringify(Payload));
         });
@@ -367,9 +401,13 @@ describe('StateProcessor', () => {
 
     describe('When the Payload has a path at the root', () => {
       it(`should fill that path`, () => {
-        const result = StateProcessor.processParameters('{"something1": "something2", "haha": 123}', {
-          'Something.$': '$.haha',
-        });
+        const result = StateProcessor.processParameters(
+          '{"something1": "something2", "haha": 123}',
+          {
+            'Something.$': '$.haha',
+          },
+          context,
+        );
 
         expect(result).toEqual(
           JSON.stringify({
@@ -386,6 +424,7 @@ describe('StateProcessor', () => {
           {
             'Something.$': '$.foo.bar',
           },
+          context,
         );
 
         expect(result).toEqual(
@@ -405,6 +444,7 @@ describe('StateProcessor', () => {
               'foo.$': '$.foo.bar',
             },
           },
+          context,
         );
 
         expect(result).toEqual(
