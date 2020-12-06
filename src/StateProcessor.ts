@@ -89,11 +89,22 @@ export class StateProcessor {
     result: Record<string, unknown> | unknown[],
     resultPath?: string,
   ): string {
+    this.logger.debug('processResultPath');
     if (!resultPath || resultPath === '$') {
+      this.logger.debug('No result path defined');
       return JSON.stringify(result);
     }
 
-    const resultPathArray = (JSONPath as any).toPathArray(resultPath);
+    this.logger.debug(resultPath);
+
+    let resultPathArray = (JSONPath as any).toPathArray(resultPath);
+
+    // Not sure why, but sometimes there dollar sign is missing :/
+    if (resultPathArray[0] !== '$') {
+      resultPathArray = ['$', ...resultPathArray];
+    }
+
+    this.logger.debug(resultPathArray);
 
     let temp: any = input;
     for (let i = 1; i < resultPathArray.length; i++) {

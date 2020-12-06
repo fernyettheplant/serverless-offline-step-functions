@@ -78,8 +78,14 @@ export class MapExecutor extends StateTypeExecutor {
     output: Record<string, unknown> | unknown[],
     stateDefinition: MapStateDefinition,
   ): unknown {
+    this.logger.debug(`MapExecutor - processOutput - stepOutputJSON - input`);
+    this.logger.debug(typeof input);
+    this.logger.debug(JSON.stringify(input));
+    this.logger.debug(`MapExecutor - processOutput - stepOutputJSON - output`);
+    this.logger.debug(JSON.stringify(output));
+    this.logger.debug(typeof output);
+
     const stepOutputJSON = StateProcessor.processResultPath(input, output, stateDefinition.ResultPath);
-    this.logger.debug(`MapExecutor - processOutput - stepOutputJSON`);
     this.logger.debug(stepOutputJSON);
     const outputJson = StateProcessor.processOutputPath(stepOutputJSON, stateDefinition.OutputPath);
     this.logger.debug(outputJson);
