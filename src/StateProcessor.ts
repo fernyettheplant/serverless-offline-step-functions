@@ -86,7 +86,7 @@ export class StateProcessor {
 
   public static processResultPath(
     input: Record<string, unknown>,
-    result: Record<string, unknown>,
+    result: Record<string, unknown> | unknown[],
     resultPath?: string,
   ): string {
     if (!resultPath || resultPath === '$') {
