@@ -34,8 +34,8 @@ export class MapExecutor extends StateTypeExecutor {
 
     const iterable = this.processInput(inputJson, stateDefinition, context);
 
-    type MyType = ExecuteType | string | void;
-    const output: MyType[] = [];
+    type IterableType = ExecuteType | string | void;
+    const iterableOutput: IterableType[] = [];
     await Promise.all(
       iterable.map(async (value: unknown, index: number) => {
         const tempContext = context.clone();
@@ -57,15 +57,44 @@ export class MapExecutor extends StateTypeExecutor {
           throw execution.error;
         }
 
-        output.push(execution);
+        iterableOutput.push(typeof execution === 'string' ? JSON.parse(execution) : execution);
       }),
     );
+
+    this.logger.debug('Finished processing iterable');
+    this.logger.debug(JSON.stringify(iterableOutput));
+
+    const output = this.processOutput(JSON.parse(inputJson), iterableOutput, stateDefinition);
 
     return {
       Next: stateDefinition.Next,
       End: stateDefinition.End,
       json: JSON.stringify(output),
     };
+  }
+
+  private processOutput(
+    input: Record<string, unknown>,
+    output: Record<string, unknown> | unknown[],
+    stateDefinition: MapStateDefinition,
+  ): unknown {
+    const stepOutputJSON = StateProcessor.processResultPath(input, output, stateDefinition.ResultPath);
+    this.logger.debug(`MapExecutor - processOutput - stepOutputJSON`);
+    this.logger.debug(stepOutputJSON);
+    const outputJson = StateProcessor.processOutputPath(stepOutputJSON, stateDefinition.OutputPath);
+    this.logger.debug(outputJson);
+
+    let processedOutput: unknown;
+    try {
+      processedOutput = JSON.parse(outputJson);
+      this.logger.debug(`processedOutput`);
+      this.logger.debug(typeof processedOutput);
+    } catch (error) {
+      this.logger.error(`MapExecutor.processInput: Could not parse JSON: "${outputJson}"`);
+      throw error;
+    }
+
+    return processedOutput;
   }
 
   // TODO: Extract to a common place for Map & Task executors
