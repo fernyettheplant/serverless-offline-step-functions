@@ -59,6 +59,17 @@ describe('Map Executor', () => {
       const output = (mapExecutor as any).processOutput({ prop1: 'id1', items: [] }, stepOutput, stateDefinition);
       expect(output.haha[0].item).toEqual(1);
     });
+
+    it('should return objects in the array', () => {
+      stateDefinition.ResultPath = '$.step2Details.items';
+      const stepOutput = [{ haha: 4 }, { haha: 1 }];
+      const output = (mapExecutor as any).processOutput(
+        { prop1: 'id1', step2Details: { items: ['adsfdsgdf', 'sdfasfg'] }, items: [] },
+        stepOutput,
+        stateDefinition,
+      );
+      expect(output).toEqual({ prop1: 'id1', step2Details: { items: stepOutput }, items: [] });
+    });
   });
 
   describe('When the output path is defined', () => {
