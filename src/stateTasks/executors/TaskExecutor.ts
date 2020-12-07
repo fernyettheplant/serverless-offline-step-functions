@@ -126,7 +126,7 @@ export class TaskExecutor extends StateTypeExecutor {
 
   private processOutput(
     input: Record<string, unknown>,
-    output: Record<string, unknown>,
+    output: Record<string, unknown> | unknown[],
     stateDefinition: TaskStateDefinition,
   ): string {
     this.logger.debug(`TaskExecutor - processOutput1 - ${output}`);

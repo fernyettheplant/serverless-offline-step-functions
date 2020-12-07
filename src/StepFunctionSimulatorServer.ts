@@ -88,7 +88,9 @@ export class StepFunctionSimulatorServer {
           return;
         }
 
-        this.pendingStateMachineExecutions[req.body.taskToken]();
+        this.logger.log(`Going to resume taskToken "${req.body.taskToken}" with output "${req.body.output}"`);
+
+        this.pendingStateMachineExecutions[req.body.taskToken](JSON.parse(req.body.output));
         return;
       }
 
