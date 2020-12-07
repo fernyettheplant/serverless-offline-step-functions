@@ -9,7 +9,9 @@ import { ContextToJson } from './Context/ContextToJson';
 import { StateMachine } from './StateMachine/StateMachine';
 import { isJsonByteLengthValid } from './utils/isJsonByteLengthValid';
 
-export type ExecuteType = () => Promise<ExecuteType | string | void | StateMachineExecutorError>;
+export type ExecuteType = (
+  waitForTaskTokenOutput?: Record<string, unknown> | unknown[],
+) => Promise<ExecuteType | string | void | StateMachineExecutorError>;
 
 export class StateMachineExecutorError {
   constructor(public readonly error: Error) {}
@@ -64,9 +66,17 @@ export class StateMachineExecutor {
 
       const nextState = StateContext.create(stateExecutorOutput.Next);
 
-      const executeNextState = () => {
+      const executeNextState = (waitForTaskTokenOutput?: Record<string, unknown> | unknown[]) => {
         this.context.transitionTo(nextState);
-        return this.execute(this.stateMachine.definition.States[nextState.Name], stateExecutorOutput.json);
+
+        // TODO: Find a better solution. Probably extract IO processing to this class instead of the executors
+        const output = (typeExecutor as any).processOutput(
+          JSON.parse(inputJson || '{}'),
+          waitForTaskTokenOutput,
+          stateDefinition,
+        );
+
+        return this.execute(this.stateMachine.definition.States[nextState.Name], output); //  stateExecutorOutput.json
       };
 
       this.logger.log(`Output: \n${JSON.stringify(JSON.parse(stateExecutorOutput.json), null, 2)}\n`);
