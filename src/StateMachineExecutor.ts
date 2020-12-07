@@ -76,7 +76,7 @@ export class StateMachineExecutor {
           stateDefinition,
         );
 
-        return this.execute(this.stateMachine.definition.States[nextState.Name], output); //  stateExecutorOutput.json
+        return this.execute(this.stateMachine.definition.States[nextState.Name], output);
       };
 
       this.logger.log(`Output: \n${JSON.stringify(JSON.parse(stateExecutorOutput.json), null, 2)}\n`);
