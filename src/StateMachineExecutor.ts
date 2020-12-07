@@ -70,11 +70,14 @@ export class StateMachineExecutor {
         this.context.transitionTo(nextState);
 
         // TODO: Find a better solution. Probably extract IO processing to this class instead of the executors
-        const output = (typeExecutor as any).processOutput(
-          JSON.parse(inputJson || '{}'),
-          waitForTaskTokenOutput,
-          stateDefinition,
-        );
+        let output = stateExecutorOutput.json;
+        if (waitForTaskTokenOutput) {
+          output = (typeExecutor as any).processOutput(
+            JSON.parse(inputJson || '{}'),
+            waitForTaskTokenOutput,
+            stateDefinition,
+          );
+        }
 
         return this.execute(this.stateMachine.definition.States[nextState.Name], output);
       };
