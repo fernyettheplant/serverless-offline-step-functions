@@ -104,7 +104,10 @@ export class StateProcessor {
       resultPathArray = ['$', ...resultPathArray];
     }
 
+    this.logger.debug('resultPathArray');
     this.logger.debug(resultPathArray);
+    this.logger.debug('input');
+    this.logger.debug(JSON.stringify(input));
 
     let temp: any = input;
     for (let i = 1; i < resultPathArray.length; i++) {

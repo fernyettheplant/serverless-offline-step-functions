@@ -53,7 +53,7 @@ export class TaskExecutor extends StateTypeExecutor {
 
     this.envVarResolver.removeEnvVarsLambdaSpecific(stateInfo.environment);
 
-    const outputJson = this.processOutput(input, output, stateDefinition);
+    const outputJson = this.processOutput(JSON.parse(inputJson || '{}'), output, stateDefinition);
 
     return {
       Next: stateDefinition.Next,
@@ -129,13 +129,14 @@ export class TaskExecutor extends StateTypeExecutor {
     output: Record<string, unknown> | unknown[],
     stateDefinition: TaskStateDefinition,
   ): string {
-    this.logger.debug(`TaskExecutor - processOutput1 - ${output}`);
+    this.logger.debug(`TaskExecutor - processOutput1 - ${JSON.stringify(output)}`);
     let outputJson = output ? JSON.stringify(output) : '{}';
 
     // TODO: Do Result Selector
     outputJson = StateProcessor.processResultPath(input, output, stateDefinition.ResultPath);
     this.logger.debug(`TaskExecutor - processOutput2 - ${outputJson}`);
     outputJson = StateProcessor.processOutputPath(outputJson, stateDefinition.OutputPath);
+    this.logger.debug(`TaskExecutor - processOutput3 - ${outputJson}`);
 
     return outputJson;
   }
