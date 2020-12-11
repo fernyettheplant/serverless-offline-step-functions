@@ -44,7 +44,7 @@ export class StateMachineExecutor {
     try {
       stateExecutorOutput = await typeExecutor.execute(this.context, stateDefinition, inputJson);
 
-      this.logger.debug(`StateMachineExecutor - execute1 - ${stateExecutorOutput}`);
+      this.logger.debug(`StateMachineExecutor - execute1 - ${JSON.stringify(stateExecutorOutput)}`);
 
       if (!isJsonByteLengthValid(stateExecutorOutput.json)) {
         this.logger.error(
