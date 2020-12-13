@@ -77,7 +77,7 @@ plugins:
 | **_Pass_**     | ✅                                                                                 |
 | **_Fail_**     | ✅                                                                                 |
 | **_Succeed_**  | ✅                                                                                 |
-| **_Map_**      | Not Supported at all yet.                                                          |
+| **_Map_**      | Basic Support                                                                      |
 
 ## Credits and inspiration
 
