@@ -1,3 +1,5 @@
+import chunk from 'lodash.chunk';
+
 import { StateTypeExecutor } from '../StateTypeExecutor';
 import type { StateExecutorOutput } from '../../types/StateExecutorOutput';
 import type { MapStateDefinition } from '../../types/State';
@@ -10,6 +12,7 @@ import { StateMachineDescription } from '../../types/StateMachineDescription';
 import { StateMachine } from '../../StateMachine/StateMachine';
 import { Logger } from '../../utils/Logger';
 
+type IterableType = ExecuteType | string | void;
 export class MapExecutor extends StateTypeExecutor {
   private pendingStateMachineExecutions: { [key: string]: ExecuteType } = {};
 
@@ -34,10 +37,8 @@ export class MapExecutor extends StateTypeExecutor {
 
     const iterable = this.processInput(inputJson, stateDefinition, context);
 
-    type IterableType = ExecuteType | string | void;
-    const iterableOutput: IterableType[] = [];
-    await Promise.all(
-      iterable.map(async (value: unknown, index: number) => {
+    const iterableOutputPromises: Promise<IterableType>[] = iterable.map(
+      async (value: unknown, index: number): Promise<IterableType> => {
         const tempContext = context.clone();
         tempContext.startMapItration(index, typeof value === 'string' ? value : JSON.stringify(value));
 
@@ -57,9 +58,28 @@ export class MapExecutor extends StateTypeExecutor {
           throw execution.error;
         }
 
-        iterableOutput.push(typeof execution === 'string' ? JSON.parse(execution) : execution);
-      }),
+        return typeof execution === 'string' ? JSON.parse(execution) : execution;
+      },
     );
+
+    const maxConcurrency = stateDefinition.MaxConcurrency || 0;
+
+    let iterableOutput: IterableType[] = [];
+    if (maxConcurrency <= 0) {
+      this.logger.log('Running Map iterables in Parallel');
+      iterableOutput = await Promise.all(iterableOutputPromises);
+    } else {
+      this.logger.log(`Running Map iterables in chunks of ${maxConcurrency}`);
+      const promiseChunks = chunk(iterableOutputPromises, maxConcurrency);
+
+      for (let index = 0; index < promiseChunks.length; index++) {
+        const promisechunk = promiseChunks[index];
+        this.logger.log(`Running Map iterable chunk (${index + 1}/${promiseChunks.length})`);
+        const result = await Promise.all(promisechunk);
+
+        iterableOutput.push(...result);
+      }
+    }
 
     this.logger.debug('Finished processing iterable');
     this.logger.debug(JSON.stringify(iterableOutput));
