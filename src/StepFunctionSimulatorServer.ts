@@ -63,6 +63,7 @@ export class StepFunctionSimulatorServer {
 
           return ['application/x-amz-json-1.0'].includes(contentType);
         },
+        limit: '262144b',
       }),
     );
 
