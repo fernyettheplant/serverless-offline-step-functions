@@ -47,12 +47,12 @@ custom:
   '@fernthedev/serverless-offline-step-functions':
     port: 8014
     enabled: true
-    debugger: false
+    debug: false
 ```
 
 - `port`: Port of the Step Functions API Simulator (Default: 8014)
 - `enabled`: Enabled Step Function API Simulator (Default: true)
-- `debugger`: Enable Debugger Output (Default: false)
+- `debug`: Enable Debugger Output (Default: false)
 
 ## Using it with Webpack
 

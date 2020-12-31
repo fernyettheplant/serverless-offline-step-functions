@@ -167,7 +167,7 @@ export class StateProcessor {
           throw new Error(`Could not find "${pathOrValue}" in JSON "${dataJson}"`);
         }
 
-        const jsonPathResult = result[0];
+        const jsonPathResult = result.length === 1 ? result[0] : result;
 
         projectedObject[key.replace(/\.\$$/giu, '')] = jsonPathResult;
       } else {
