@@ -1,5 +1,5 @@
 import { JSONPath } from 'jsonpath-plus';
-import { PayloadTemplateType } from '../src/types/State';
+import { PayloadTemplateType, ResultSelectorType } from '../src/types/State';
 import { Context } from './Context/Context';
 import { LambdaWaitFotTokenPayloadTemplate } from './PayloadTemplates/LambdaWaitFotTokenPayloadTemplate';
 import { ParameterPayloadTemplate } from './PayloadTemplates/ParameterPayloadTemplate';
@@ -142,5 +142,43 @@ export class StateProcessor {
     }
 
     return JSON.stringify(result[0]);
+  }
+
+  public static processResultSelector(dataJson: string, resultSelector: ResultSelectorType | undefined): string {
+    this.logger.debug('Starting processResultSelector');
+    this.logger.debug(JSON.stringify(dataJson));
+    this.logger.debug(JSON.stringify(resultSelector));
+
+    if (!resultSelector) {
+      this.logger.debug('No ResultSelector Defined. skipping.');
+      return dataJson;
+    }
+
+    const parsedDataJson = JSON.parse(dataJson);
+
+    const resultSelectorObject = Object.entries(resultSelector).reduce((projectedObject, [key, pathOrValue]) => {
+      if (key.endsWith('.$')) {
+        const result = JSONPath({
+          path: pathOrValue,
+          json: parsedDataJson,
+        });
+
+        if (!result || result.length === 0) {
+          throw new Error(`Could not find "${pathOrValue}" in JSON "${dataJson}"`);
+        }
+
+        const jsonPathResult = result[0];
+
+        projectedObject[key.replace(/\.\$$/giu, '')] = jsonPathResult;
+      } else {
+        projectedObject[key] = pathOrValue;
+      }
+
+      return projectedObject;
+    }, {});
+
+    this.logger.debug('finished processResultSelector');
+    this.logger.debug(JSON.stringify(resultSelectorObject));
+    return JSON.stringify(resultSelectorObject);
   }
 }
