@@ -105,8 +105,11 @@ export class MapExecutor extends StateTypeExecutor {
     this.logger.debug(JSON.stringify(output));
     this.logger.debug(typeof output);
 
-    // TODO: Figure out Result Selector for iterable output
-    const stepOutputJSON = StateProcessor.processResultPath(input, output, stateDefinition.ResultPath);
+    let stepOutputJSON: string = StateProcessor.processResultSelector(
+      JSON.stringify(output),
+      stateDefinition.ResultSelector,
+    );
+    stepOutputJSON = StateProcessor.processResultPath(input, JSON.parse(stepOutputJSON), stateDefinition.ResultPath);
     this.logger.debug(stepOutputJSON);
     const outputJson = StateProcessor.processOutputPath(stepOutputJSON, stateDefinition.OutputPath);
     this.logger.debug(outputJson);
