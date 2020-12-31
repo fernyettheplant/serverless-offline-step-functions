@@ -39,6 +39,10 @@ class ServerlessOfflineStepFunctionsPlugin {
             required: false,
             usage: 'Enabled Step Function API Simulator (Default: true)',
           },
+          debug: {
+            required: false,
+            usage: 'Enable Debugger Output (Default: false)',
+          },
         },
       },
     };
@@ -49,6 +53,10 @@ class ServerlessOfflineStepFunctionsPlugin {
       // Simulator Will not be executed
       this.logger.warning('Simulator will not execute.');
       return;
+    }
+
+    if (this.options?.debug === true) {
+      this.logger.turnOnDebugger();
     }
 
     this.hooks = {

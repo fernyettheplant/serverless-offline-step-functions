@@ -47,10 +47,12 @@ custom:
   '@fernthedev/serverless-offline-step-functions':
     port: 8014
     enabled: true
+    debugger: false
 ```
 
 - `port`: Port of the Step Functions API Simulator (Default: 8014)
 - `enabled`: Enabled Step Function API Simulator (Default: true)
+- `debugger`: Enable Debugger Output (Default: false)
 
 ## Using it with Webpack
 
@@ -65,6 +67,11 @@ plugins:
   - '@fernthedev/serverless-offline-step-functions'
   - serverless-offline
 ```
+
+## Known Issues
+
+- The library will only start with `$npx sls offline start` and not `npx sls offline`.
+- If there's no input for the options it will throw an error. please copy&paste the ones provided on the top.
 
 ## State Types Supported
 

@@ -4,6 +4,11 @@ import consola from 'consola';
 export class Logger {
   private static INSTANCE: Logger;
   private readonly logPrefix = chalk.magenta('[Step Functions API Simulator]');
+  private isDebuggerOn: boolean;
+
+  private constructor() {
+    this.isDebuggerOn = false;
+  }
 
   public static getInstance(): Logger {
     if (!this.INSTANCE) {
@@ -13,13 +18,16 @@ export class Logger {
     return this.INSTANCE;
   }
 
+  public turnOnDebugger(): void {
+    this.isDebuggerOn = true;
+  }
+
   public success(message: string): void {
     consola.success(`${this.logPrefix} ${chalk.greenBright(message)}`);
   }
 
   public debug(message: string): void {
-    // TODO: Get from config, or default to false
-    if (false) {
+    if (this.isDebuggerOn) {
       consola.log(`${this.logPrefix} ${chalk.greenBright(message)}`);
     }
   }

@@ -105,11 +105,13 @@ type LambdaTaskStateParameters = {
 
 export type PayloadTemplateType = LambdaTaskStateParameters & Record<string, unknown>;
 
+export type ResultSelectorType = Record<string, string>;
+
 export type TaskStateDefinition = CommonStateDefinition & {
   Resource?: string;
   Parameters?: PayloadTemplateType;
   ResultPath?: string;
-  ResultSelector?: string;
+  ResultSelector?: ResultSelectorType;
   Retry?: TaskRetryRule[];
   Catch?: TaskCatchRule[];
   TimeoutSeconds?: number;
@@ -124,7 +126,7 @@ export type MapStateDefinition = CommonStateDefinition & {
   Parameters?: PayloadTemplateType;
   MaxConcurrency?: number;
   ResultPath?: string;
-  ResultSelector?: string;
+  ResultSelector?: ResultSelectorType;
   Retry?: TaskRetryRule[];
   Catch?: TaskCatchRule[];
 };
@@ -139,7 +141,7 @@ export type WaitStateDefinition = CommonStateDefinition & {
 export type ParallelStateDefinition = CommonStateDefinition & {
   Branches: StateMachineDefinition[];
   ResultPath?: string;
-  ResultSelector?: string;
+  ResultSelector?: ResultSelectorType;
   Retry?: TaskRetryRule[];
   Catch?: TaskCatchRule[];
 };

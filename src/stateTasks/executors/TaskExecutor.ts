@@ -132,7 +132,7 @@ export class TaskExecutor extends StateTypeExecutor {
     this.logger.debug(`TaskExecutor - processOutput1 - ${JSON.stringify(output)}`);
     let outputJson = output ? JSON.stringify(output) : '{}';
 
-    // TODO: Do Result Selector
+    outputJson = StateProcessor.processResultSelector(outputJson, stateDefinition.ResultSelector);
     outputJson = StateProcessor.processResultPath(input, output, stateDefinition.ResultPath);
     this.logger.debug(`TaskExecutor - processOutput2 - ${outputJson}`);
     outputJson = StateProcessor.processOutputPath(outputJson, stateDefinition.OutputPath);
@@ -149,7 +149,7 @@ export class TaskExecutor extends StateTypeExecutor {
       await fs.access(webpackPath, FsConstants.F_OK | FsConstants.R_OK);
       filePathResolved = webpackPath;
     } catch (error) {
-      filePathResolved = `./${lambdaFilePath}`;
+      filePathResolved = path.resolve(process.cwd(), `./${lambdaFilePath}.js`);
     }
 
     return filePathResolved;
