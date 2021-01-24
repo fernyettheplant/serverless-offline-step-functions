@@ -15,6 +15,8 @@ export class ChoiceExecutor extends StateTypeExecutor {
     json: string | undefined,
   ): Promise<StateExecutorOutput> {
     const input = this.processInput(json, definition);
+    this.logger.debug('* * * Choice Input * * *');
+    this.logger.debug(input);
     let nextState: string | undefined = undefined;
 
     for (const choice of definition.Choices) {
@@ -39,15 +41,17 @@ export class ChoiceExecutor extends StateTypeExecutor {
         evaluationPassed = this.evaluateChoice(comparator, choice, input);
       }
 
+      this.logger.debug(`* * * Evaluation Passed?: ${evaluationPassed}`);
       if (evaluationPassed) {
         nextState = choice.Next;
+        this.logger.debug(`* * * Next state is : ${nextState}`);
         break; // We got already our branch. time to short circuit
       }
     }
 
     if (!nextState && definition.Default) {
       nextState = definition.Default;
-    } else {
+    } else if (!nextState && !definition.Default) {
       throw new Error('No NextState or Default');
     }
 
@@ -75,6 +79,9 @@ export class ChoiceExecutor extends StateTypeExecutor {
       throw new Error('no "Variable" attribute found in Choice rule');
     }
 
+    this.logger.debug('* * * Choice Variable * * *');
+    this.logger.debug(choice.Variable);
+
     const pathResult = JSONPath({
       path: choice.Variable,
       json: JSON.parse(json),
@@ -85,6 +92,7 @@ export class ChoiceExecutor extends StateTypeExecutor {
     }
 
     let inputValue: string | number = pathResult[0];
+    this.logger.debug(`Input Value Choice: ${inputValue}`);
     let choiceValue: string | number = choice[comparator];
 
     // This conversion is just to have a precise way to measure dates

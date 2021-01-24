@@ -9,7 +9,7 @@ export class SucceedExecutor extends StateTypeExecutor {
     _definition: SucceedStateDefinition,
     inputJson: string | undefined,
   ): Promise<StateExecutorOutput> {
-    this.logger.error(`StateMachine "${context.StateMachine.Name}" succeed on "${context.State.Name}"`);
+    this.logger.success(`StateMachine "${context.StateMachine.Name}" succeed on "${context.State.Name}"`);
     return Promise.resolve({
       End: true,
       json: inputJson || '{}',
