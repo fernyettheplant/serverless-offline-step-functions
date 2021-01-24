@@ -1,4 +1,6 @@
 import { JSONPath } from 'jsonpath-plus';
+import isNull from 'lodash.isnull';
+import isUndefined from 'lodash.isundefined';
 import { PayloadTemplateType, ResultSelectorType } from '../src/types/State';
 import { Context } from './Context/Context';
 import { LambdaWaitFotTokenPayloadTemplate } from './PayloadTemplates/LambdaWaitFotTokenPayloadTemplate';
@@ -87,15 +89,22 @@ export class StateProcessor {
   public static processResultPath(
     input: Record<string, unknown>,
     result: Record<string, unknown> | unknown[],
-    resultPath?: string,
+    resultPath: string | null | undefined,
   ): string {
-    this.logger.debug('processResultPath');
-    if (!resultPath || resultPath === '$') {
-      this.logger.debug('No result path defined');
+    this.logger.debug('* * * processResultPath * * *');
+
+    if (isUndefined(resultPath)) {
+      this.logger.debug('* * * Will not proceess processResultPath * * *');
+      return JSON.stringify(result);
+    } else if (isNull(resultPath)) {
+      this.logger.debug('ResultPath "null" will pass the original input to the output.');
+      return JSON.stringify(input);
+    } else if (resultPath === '$') {
+      this.logger.debug('ResultPath "$" will return original result');
       return JSON.stringify(result);
     }
 
-    this.logger.debug(resultPath);
+    this.logger.debug(`ResulPath: ${resultPath as string}`);
 
     let resultPathArray = (JSONPath as any).toPathArray(resultPath);
 
