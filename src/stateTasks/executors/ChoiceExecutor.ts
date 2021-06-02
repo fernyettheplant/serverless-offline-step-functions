@@ -103,29 +103,31 @@ export class ChoiceExecutor extends StateTypeExecutor {
 
     // TODO: Find a better way to map the comparators with the methods without using factories or strategy
     switch (comparator) {
+      case "IsPresent":
+        return choiceValue ? inputValue !== undefined : inputValue === undefined;  
       case 'BooleanEquals':
       case 'NumericEquals':
       case 'StringEquals':
       case 'TimestampEquals':
-        return this.checkEquals(choiceValue, inputValue);
+        return this.checkEquals(inputValue, choiceValue);
       case 'NumericGreaterThan':
       case 'StringGreaterThan':
       case 'TimestampGreaterThan':
-        return this.checkGreaterThan(choiceValue, inputValue);
+        return this.checkGreaterThan(inputValue, choiceValue);
       case 'NumericGreaterThanEquals':
       case 'StringGreaterThanEquals':
       case 'TimestampGreaterThanEquals':
-        return this.checkGreaterThanEquals(choiceValue, inputValue);
+        return this.checkGreaterThanEquals(inputValue, choiceValue);
       case 'NumericLessThan':
       case 'StringLessThan':
       case 'TimestampLessThan':
-        return this.checkLowerThan(choiceValue, inputValue);
+        return this.checkLowerThan(inputValue, choiceValue);
       case 'NumericLessThanEquals':
       case 'StringLessThanEquals':
       case 'TimestampLessThanEquals':
-        return this.checkLowerThanEquals(choiceValue, inputValue);
+        return this.checkLowerThanEquals(inputValue, choiceValue);
       default:
-        throw new Error();
+        throw new Error(`Comparator ${comparator} not implemented`);
     }
   }
 
