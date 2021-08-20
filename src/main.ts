@@ -34,14 +34,17 @@ class ServerlessOfflineStepFunctionsPlugin {
           port: {
             required: false,
             usage: 'Port of the Step Functions API Simulator (Default: 8014)',
+            type: 'string',
           },
           enabled: {
             required: false,
             usage: 'Enabled Step Function API Simulator (Default: true)',
+            type: 'boolean',
           },
           debug: {
             required: false,
             usage: 'Enable Debugger Output (Default: false)',
+            type: 'boolean',
           },
         },
       },
