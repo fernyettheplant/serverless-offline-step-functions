@@ -122,6 +122,10 @@ class ServerlessOfflineStepFunctionsPlugin {
       for (const [key, value] of Object.entries(resource)) {
         if (key === 'Fn::GetAtt') {
           functionName = value[0];
+
+          if( functionName.endsWith('LambdaFunction') ) {
+            functionName = functionName.slice(0, -'LambdaFunction'.length);
+          }
         }
       }
     }
